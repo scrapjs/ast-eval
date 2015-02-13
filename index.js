@@ -8,6 +8,9 @@ var types = require('ast-types');
 var n = types.namedTypes, b = types.builders;
 var gen = require('escodegen').generate;
 var parse = require('esprima').parse;
+var analyze = require('escope').analyze;
+var q = require('esquery');
+
 
 function astEval(ast){
 	types.visit(ast, {
@@ -61,9 +64,11 @@ function astEval(ast){
 						'some',
 						'sort'
 					].indexOf(node.callee.property.name) >= 0 &&
-					node.arguments.every(isSimple)
+					n.FunctionExpression.check(node.arguments[0]) &&
+					isIsolated(node.arguments[0])
 				) {
-
+					//eval array, return recreated evaled value
+					return parse(JSON.stringify(eval(gen(node)))).body[0].expression;
 				}
 
 				//method, accepting simple arguments
@@ -115,7 +120,14 @@ function isSimple(node){
 
 /** Checks whether function doesn’t use external variables */
 function isIsolated(node){
+	//if node refers to external vars - not isolated
+	var scope = analyze(node).scopes[0];
+	if (scope.through.length) return;
 
+	//also if it includes `ThisExpression` - ignore it
+	if (q(node, 'ThisExpression').length) return;
+
+	return true;
 }
 
 

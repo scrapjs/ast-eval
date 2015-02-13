@@ -21,5 +21,13 @@ gen(ast); //'[1, false, 43, false]'
 ```
 
 
+## Features
+
+* Eval simple maths: `1000 * 60 * 60` → `3600000`
+* Eval logical expressions: `{a:1} && {b:2}` → `true`
+* Eval simple arrays methods: `[1,2,3].concat(4, [5])` → `[1,2,3,4,5]`, `[1,2,3].map(function(x){ return x*2})` → `[2,4,6]`
+* Eval `Math` module expressions: `Math.sin(Math.Pi / 2 )` → 1
+
+
 
 [![NPM](https://nodei.co/npm/ast-eval.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/ast-eval/)
