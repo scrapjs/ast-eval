@@ -10,7 +10,7 @@ var astEval = require('./');
 
 // var src = '[1, 2, 3+4*10+n, 3+4*10+(n||6), beep.boop(3+5), obj[""+"x"].y, 1===2+3-16/4, [2]==2, [2]!==2, [2]!==[2]]';
 
-describe('Eseval', function(){
+describe('Expressions', function(){
 	it('boolean', function(){
 		var src = '[1 && true, 1===2+3-16/4, [2]==2, [2]!==2, [2]!==[2]]';
 		var ast = esprima.parse(src);
@@ -52,23 +52,23 @@ describe('Eseval', function(){
 		assert.deepEqual(eval(out), [1, true, 45.24, 'x']);
 	});
 
-	it('maths');
+	it('maths', function(){
+		var src = 'Math.sin(Math.PI / 2)';
+	});
 
 	it('dates');
 
-	it('arrays');
-
 	it('decalc props');
 
-
-	it('decalculated properties');
 
 	it.skip('scoped variables', function(){
 		'[1,2,3+4*10+(n||6),foo(3+5),obj[""+"x"].y]';
 		'(function(){var x = 2; return x;})() + 1';
 	});
+});
 
-	it('array transforms', function(){
+describe('Array', function(){
+	it('transforms', function(){
 		var src = '[1, 2, 3].map(function(n) {return n * 2 })';
 		var ast = esprima.parse(src);
 
@@ -78,12 +78,12 @@ describe('Eseval', function(){
 		assert.deepEqual(out, "[2,4,6];");
 	});
 
-	it.skip('unresolvable array transforms', function(){
+	it.skip('unresolvable transforms', function(){
 		'[1,2,x].map(function(n){return n;}';
 		'[1,2,3].map(function(n){window; return n;}';
 	});
 
-	it('array mutators', function(){
+	it('mutators', function(){
 		var src = '[1, 2, 3].concat(4, [5])';
 		var ast = esprima.parse(src);
 
@@ -93,12 +93,12 @@ describe('Eseval', function(){
 		assert.deepEqual(out, "[1,2,3,4,5];");
 	});
 
-	it.skip('unresolvable array mutators', function(){
+	it.skip('unresolvable mutators', function(){
 		'[1, 2, x].concat(4, [5])'
 		'[1, 2, 3].concat(4, [x])'
 	});
 
-	it('array methods', function(){
+	it('methods', function(){
 		var src = '["a", "b", "c"].join(" ")';
 		var ast = esprima.parse(src);
 
@@ -107,7 +107,9 @@ describe('Eseval', function(){
 
 		assert.deepEqual(out, "'a b c';");
 	});
+
 });
 
+	// it('loops')
 
 assert.equal();
