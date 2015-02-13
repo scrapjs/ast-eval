@@ -16,7 +16,7 @@ describe('Expressions', function(){
 		var src = '[1 && true, 1===2+3-16/4, [2]==2, [2]!==2, [2]!==[2]]';
 		var ast = parse(src);
 
-		ast = astEval(ast);
+		ast = astEval.expression(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, '[true,true,true,true,true];');
@@ -26,7 +26,7 @@ describe('Expressions', function(){
 		var src = '[1,2,3+4*10*z+n,foo(3+5),obj[""+"x"].y]';
 		var ast = parse(src);
 
-		ast = astEval(ast);
+		ast = astEval.expression(ast);
 		var out = gen(ast);
 		console.log(out)
 
@@ -37,15 +37,34 @@ describe('Expressions', function(){
 		var src = '[1,2=="2",3.1+4*10+(2.14||6),""+"x", 2 > 4, [] + []]';
 		var ast = parse(src);
 
-		ast = astEval(ast);
+		ast = astEval.expression(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "[1,true,45.24,'x',false,''];");
 	});
 
 	it('proper order', function(){
-		'1 + 2 * 3';
-		'2 * 3 + 1';
+		var src1 = '1 + 2 * 3';
+		var ast1 = parse(src1);
+		ast1 = astEval.expression(ast1);
+		var out1 = gen(ast1, {format: {indent: {style: ''}, newline: ''}});
+
+		var src2 = '2 * 3 + 1';
+		var ast2 = parse(src2);
+		ast2 = astEval.expression(ast2);
+		var out2 = gen(ast1, {format: {indent: {style: ''}, newline: ''}});
+
+		assert.equal(out1, out2);
+	});
+
+
+	it('unary operator', function(){
+		var src = '-1 + 2';
+		var ast = parse(src);
+		ast = astEval.expression(ast);
+		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
+
+		assert.equal(out, '1;');
 	});
 
 	it.skip('property getter', function(){
@@ -193,6 +212,8 @@ describe('String', function(){
 	});
 });
 
-	// it('loops')
+describe('loops', function(){
+
+});
 
 assert.equal();

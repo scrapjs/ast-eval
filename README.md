@@ -1,6 +1,7 @@
 # ast-eval [![Build Status](https://travis-ci.org/dfcreative/ast-eval.svg?branch=master)](https://travis-ci.org/dfcreative/ast-eval)
 
 Statically eval expressions in AST. Similar to [static-eval](https://github.com/substack/static-eval), but returns optimized AST instead and performs some more evaluations.
+Ast-eval also bundles a set of AST analysis utils.
 
 
 ## Use
@@ -42,9 +43,6 @@ gen(ast); //'[1, false, 43, false]'
 
 * String expressions
 `'a b c'.split(' ')` → `['a', 'b', 'c']`
-
-* Shorten number notation
-`1000` → `1e3`
 
 
 [![NPM](https://nodei.co/npm/ast-eval.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/ast-eval/)

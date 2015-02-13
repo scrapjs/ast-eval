@@ -13,9 +13,14 @@ var n = types.namedTypes, b = types.builders;
 /** Test whether node is literal or contains only literals  */
 function isSimple(node){
 	if (n.Literal.check(node)) return true;
+	if (n.UnaryExpression.check(node)) return isSimple(node.argument);
+	if (n.LogicalExpression.check(node)) return isSimple(node.left) && isSimple(node.right);
+	if (n.BinaryExpression.check(node)) return isSimple(node.left) && isSimple(node.right);
+	if (n.ConditionalExpression.check(node)) return isSimple(node.test) && isSimple(node.alternate) && isSimple(node.consequent);
+	if (n.MemberExpression.check(node)) return isSimple(node.object);
+	if (n.SequenceExpression.check(node)) return node.expressions.every(isSimple);
 	if (n.ArrayExpression.check(node)) return node.elements.every(isSimple);
 	if (n.ObjectExpression.check(node)) return node.properties.every(function(prop){
-		return isSimple(prop.value);
 	});
 }
 
@@ -33,7 +38,7 @@ function isObject(node){
 }
 
 
-/** Checks whether function doesn’t use external variables */
+/** Check whether function doesn’t use external variables */
 function isIsolated(node){
 	//refuse non-fn nodes
 	if (!n.FunctionExpression.check(node)) return;
@@ -47,6 +52,7 @@ function isIsolated(node){
 
 	return true;
 }
+
 
 /** Return name of prop in call expression */
 function getCallName(node){
@@ -76,7 +82,8 @@ function getCallName(node){
 	return node.callee.object.property.name;
 }
 
-/** Return arguments of a vall */
+
+/** Return arguments of a call */
 function getCallArguments(node){
 	if (!n.CallExpression.check(node)) return;
 	if (!n.MemberExpression.check(node.callee)) return;
