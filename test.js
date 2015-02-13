@@ -67,6 +67,16 @@ describe('Expressions', function(){
 		assert.equal(out, '1;');
 	});
 
+	it('Math primitives', function(){
+		var src = '- Math.PI + Math.PI';
+		var ast = parse(src);
+		ast = astEval.expression(ast);
+		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
+
+		assert.equal(out, '0;');
+	});
+
+
 	it.skip('property getter', function(){
 		var src = '[1,2=="2",3.1+4*10+(2.14||6),""+"x"]';
 		var ast = parse(src);

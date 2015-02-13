@@ -8,6 +8,8 @@ var analyze = require('escope').analyze;
 var q = require('esquery');
 var types = require('ast-types');
 var n = types.namedTypes, b = types.builders;
+var isPrimitive = require('is-primitive');
+var evalAst = require('./');
 
 
 /** Test whether node is literal or contains only literals  */
@@ -17,11 +19,31 @@ function isSimple(node){
 	if (n.LogicalExpression.check(node)) return isSimple(node.left) && isSimple(node.right);
 	if (n.BinaryExpression.check(node)) return isSimple(node.left) && isSimple(node.right);
 	if (n.ConditionalExpression.check(node)) return isSimple(node.test) && isSimple(node.alternate) && isSimple(node.consequent);
-	if (n.MemberExpression.check(node)) return isSimple(node.object);
 	if (n.SequenceExpression.check(node)) return node.expressions.every(isSimple);
 	if (n.ArrayExpression.check(node)) return node.elements.every(isSimple);
 	if (n.ObjectExpression.check(node)) return node.properties.every(function(prop){
 	});
+	if (n.MemberExpression.check(node)) {
+		if (isSimple(node.object)) return true;
+
+		//catch Math.*
+		if (
+			n.Identifier.check(node.object) &&
+			node.object.name === 'Math'
+		){
+			//Math['P' + 'I']
+			if (node.computed) {
+				if (isSimple(node.property)) {
+					var propName = evalAst(node.property);
+					return isPrimitive(Math[propName]);
+				}
+			}
+			//Math.PI
+			else {
+				return isPrimitive(Math[node.property.name]);
+			}
+		}
+	}
 }
 
 function isString(node){
