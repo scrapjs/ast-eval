@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "http://github.com/dfcreative/eseval"
+    "url": "http://github.com/dfcreative/ast-eval"
   },
   "keywords": [
     "static-eval",
@@ -36,9 +36,9 @@
   "author": "Deema Ywanov <df.creative@gmail.com>",
   "license": "Unlicensed",
   "bugs": {
-    "url": "https://github.com/dfcreative/eseval/issues"
+    "url": "https://github.com/dfcreative/ast-eval/issues"
   },
-  "homepage": "https://github.com/dfcreative/eseval",
+  "homepage": "https://github.com/dfcreative/ast-eval",
   "devDependencies": {
     "chai": "^2.0.0",
     "mocha": "^2.1.0"
