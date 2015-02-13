@@ -48,8 +48,78 @@ function isIsolated(node){
 	return true;
 }
 
+/** Return name of prop in call expression */
+function getCallName(node){
+	if (!n.CallExpression.check(node)) return;
+	if (!n.MemberExpression.check(node.callee)) return;
 
-/** Return similar member expression with decalculated properties */
+	//a.b()
+	if (
+		!n.MemberExpression.check(node.callee.object) &&
+		!node.callee.computed
+	)
+	return node.callee.property.name;
+
+	//a.b.call()
+	if (
+		n.MemberExpression.check(node.callee.object) &&
+		node.callee.property.name === 'call'
+	)
+	return node.callee.object.property.name;
+
+	//a.b.apply()
+	if (
+		n.MemberExpression.check(node.callee.object) &&
+		node.callee.property.name === 'apply'
+	)
+
+	return node.callee.object.property.name;
+}
+
+/** Return arguments of a vall */
+function getCallArguments(node){
+	if (!n.CallExpression.check(node)) return;
+	if (!n.MemberExpression.check(node.callee)) return;
+
+	//a.b(1,2,3)
+	if (
+		!n.MemberExpression.check(node.callee.object) &&
+		!node.callee.computed
+	)
+	return node.arguments;
+
+	//a.b.call(ctx, 1,2,3)
+	if (
+		n.MemberExpression.check(node.callee.object) &&
+		node.callee.property.name === 'call'
+	)
+	return node.arguments.slice(1);
+
+	//a.b.apply(ctx, [1,2,3])
+	if (
+		n.MemberExpression.check(node.callee.object) &&
+		node.callee.property.name === 'apply' &&
+		n.ArrayExpression.check(node.arguments[1])
+	)
+
+	return node.arguments[1].elements;
+}
+
+
+/** Get member expression initial node */
+function getMemberExpressionSource(node){
+	if (!n.MemberExpression.check(node)) return;
+
+	//go deep
+	while (n.MemberExpression.check(node)) {
+		node = node.object;
+	}
+
+	return node;
+}
+
+
+/** Return member expression with decalculated properties, if possible */
 function decompute(node){
 	types.visit(node, {
 		visitMemberExpression: function(path){
@@ -69,6 +139,9 @@ function decompute(node){
 	return node;
 }
 
+exports.getMemberExpressionSource = getMemberExpressionSource;
+exports.getCallName = getCallName;
+exports.getCallArguments = getCallArguments;
 exports.isString = isString;
 exports.isSimple = isSimple;
 exports.isObject = isObject;

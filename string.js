@@ -23,12 +23,12 @@ function evalString(ast){
 			//simple array method call
 			if (
 				n.MemberExpression.check(node.callee) &&
-				u.isString(node.callee.object)
+				u.isString(u.getMemberExpressionSource(node.callee))
 			) {
 				//method, accepting simple arguments
 				if (
-					(node.callee.property.name in String.prototype) &&
-					node.arguments.every(function(node){
+					(u.getCallName(node) in String.prototype) &&
+					u.getCallArguments(node).every(function(node){
 						return u.isSimple(node) || u.isIsolated(node);
 					})
 				) {

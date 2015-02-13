@@ -22,51 +22,17 @@ function evalArray(ast){
 			//simple array method call
 			if (n.MemberExpression.check(node.callee) &&
 				n.ArrayExpression.check(node.callee.object) &&
-				isSimple(node.callee.object)
+				u.isSimple(node.callee.object)
 			) {
-				var method;
-
-				//method, accepting fn
-				if (method = [
-						'every',
-						'map',
-						'filter',
-						'find',
-						'findIndex',
-						'reduce',
-						'reduceRight',
-						'some',
-						'sort'
-					].indexOf(node.callee.property.name) >= 0 &&
-					n.FunctionExpression.check(node.arguments[0]) &&
-					isIsolated(node.arguments[0])
-				) {
-					//eval array, return recreated evaled value
-					return parse(JSON.stringify(eval(gen(node)))).body[0].expression;
-				}
-
 				//method, accepting simple arguments
-				if (method = [
-						'copyWithin',
-						'includes',
-						'indexOf',
-						'join',
-						'lastIndexOf',
-						'concat',
-						'push',
-						'pop',
-						'reverse',
-						'shift',
-						'slice',
-						'splice',
-						'toSource',
-						'toString',
-						'unshift'
-					].indexOf(node.callee.property.name >= 0) &&
-					node.arguments.every(isSimple)
+				if (
+					(node.callee.property.name in Array.prototype) &&
+					node.arguments.every(function(node){
+						return u.isSimple(node) || u.isIsolated(node);
+					})
 				) {
 					//eval array, return recreated evaled value
-					return parse(JSON.stringify(eval(gen(node)))).body[0].expression;
+					return parse(uneval(eval(gen(node)))).body[0].expression;
 				}
 			}
 		}

@@ -25,13 +25,13 @@ function evalArray(ast){
 
 			//simple array method call
 			if (n.MemberExpression.check(node.callee) &&
-				n.ArrayExpression.check(node.callee.object) &&
-				u.isSimple(node.callee.object)
+				n.ArrayExpression.check(u.getMemberExpressionSource(node.callee)) &&
+				u.isSimple(u.getMemberExpressionSource(node.callee))
 			) {
 				//method, accepting simple arguments
 				if (
-					(node.callee.property.name in Array.prototype) &&
-					node.arguments.every(function(node){
+					(u.getCallName(node) in Array.prototype) &&
+					u.getCallArguments(node).every(function(node){
 						return u.isSimple(node) || u.isIsolated(node);
 					})
 				) {

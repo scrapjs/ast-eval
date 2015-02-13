@@ -142,7 +142,7 @@ describe('Decompute', function(){
 });
 
 
-describe('Math', function(){
+describe.skip('Math', function(){
 	it('functions', function(){
 		var src = 'Math.sin(Math.PI / 2)';
 		var ast = parse(src);
@@ -170,8 +170,20 @@ describe('String', function(){
 		'"a".badMethod'
 	});
 
-	it('static methods', function(){
-		var src = '"a_b_c".split("_")';
+	it('call/apply method', function(){
+		var src = '"".split.call("a_b_c", "_")';
+		var ast = parse(src);
+
+		ast = astEval.string(ast);
+		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
+
+		assert.deepEqual(out, "['a','b','c'];");
+	});
+
+	it('static methods');
+
+	it.skip('prototype methods', function(){
+		var src = 'String.prototype.split.call("a_b_c", "_")';
 		var ast = parse(src);
 
 		ast = astEval.string(ast);
