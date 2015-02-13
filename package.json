@@ -23,7 +23,8 @@
     "static-analysis",
     "estools",
     "eval",
-    "es-eval"
+    "es-eval",
+    "eseval"
   ],
   "author": "Deema Ywanov <df.creative@gmail.com>",
   "license": "Unlicensed",

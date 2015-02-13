@@ -68,7 +68,7 @@ describe('Eseval', function(){
 		'(function(){var x = 2; return x;})() + 1';
 	});
 
-	it('array methods', function(){
+	it('array transforms', function(){
 		var src = '[1, 2, 3].map(function(n) {return n * 2 })';
 		var ast = esprima.parse(src);
 
@@ -78,7 +78,7 @@ describe('Eseval', function(){
 		assert.deepEqual(out, "[2,4,6];");
 	});
 
-	it.skip('unresolvable array methods', function(){
+	it.skip('unresolvable array transforms', function(){
 		'[1,2,x].map(function(n){return n;}';
 		'[1,2,3].map(function(n){window; return n;}';
 	});
@@ -96,6 +96,16 @@ describe('Eseval', function(){
 	it.skip('unresolvable array mutators', function(){
 		'[1, 2, x].concat(4, [5])'
 		'[1, 2, 3].concat(4, [x])'
+	});
+
+	it('array methods', function(){
+		var src = '["a", "b", "c"].join(" ")';
+		var ast = esprima.parse(src);
+
+		ast = astEval(ast);
+		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
+
+		assert.deepEqual(out, "'a b c';");
 	});
 });
 
