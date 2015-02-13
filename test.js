@@ -76,6 +76,10 @@ describe('Expressions', function(){
 		assert.equal(out, '0;');
 	});
 
+	it.skip('Ignore math non-primitives', function(){
+		'Math.sin + 1';
+	});
+
 
 	it.skip('property getter', function(){
 		var src = '[1,2=="2",3.1+4*10+(2.14||6),""+"x"]';
