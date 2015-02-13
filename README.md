@@ -25,7 +25,7 @@ gen(ast); //'[1, false, 43, false]'
 ## Features
 
 * Binary expressions
-	* `1000 * 60 * 60` → `3600000`
+	* `1000 * 60 * 60` → `36e6`
 
 * Logical expressions
 	* `{a:1} && {b:2}` → `true`
@@ -42,7 +42,10 @@ gen(ast); //'[1, false, 43, false]'
 	* `a['x'] = 1` → `a.x = 1`
 
 * String expressions
-	*`'a b c'.split(' ')` → `['a', 'b', 'c']`
+	* `'a b c'.split(' ')` → `['a', 'b', 'c']`
+
+* [pending] Eval small loops
+	* `var x = []; for (var i = 0; i < 10; i++) {x[i] = 10*i;}`
 
 
 [![NPM](https://nodei.co/npm/ast-eval.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/ast-eval/)

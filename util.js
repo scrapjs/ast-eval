@@ -23,6 +23,11 @@ function isSimple(node){
 	if (n.ArrayExpression.check(node)) return node.elements.every(isSimple);
 	if (n.ObjectExpression.check(node)) return node.properties.every(function(prop){
 	});
+	if (n.UpdateExpression.check(node)) return isSimple(node.argument);
+	if (n.FunctionExpression.check(node)) return isIsolated(node);
+	if (n.CallExpression.check(node)) {
+		return isSimple(node.callee);
+	}
 	if (n.MemberExpression.check(node)) {
 		if (isSimple(node.object)) return true;
 
@@ -35,12 +40,12 @@ function isSimple(node){
 			if (node.computed) {
 				if (isSimple(node.property)) {
 					var propName = evalAst(node.property);
-					return isPrimitive(Math[propName]);
+					return propName in Math;
 				}
 			}
 			//Math.PI
 			else {
-				return isPrimitive(Math[node.property.name]);
+				return node.property.name in Math;
 			}
 		}
 	}
@@ -69,7 +74,7 @@ function isIsolated(node){
 	var scope = analyze(node).scopes[0];
 	if (scope.through.length) return;
 
-	//also if it includes `ThisExpression` - ignore it
+	//also if it includes `ThisExpression` - ignore it, as far `this` isn’t clear
 	if (q(node, 'ThisExpression').length) return;
 
 	return true;

@@ -175,15 +175,22 @@ describe('Decompute', function(){
 });
 
 
-describe.skip('Math', function(){
+describe('Math', function(){
 	it('functions', function(){
 		var src = 'Math.sin(Math.PI / 2)';
 		var ast = parse(src);
 
-		ast = astEval(ast);
+		ast = astEval.expression(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "1;");
+	});
+});
+
+
+describe('Other', function(){
+	it.skip('global literals', function(){
+		//TODO
 	});
 });
 
@@ -229,5 +236,8 @@ describe('String', function(){
 describe('loops', function(){
 
 });
+
+
+
 
 assert.equal();
