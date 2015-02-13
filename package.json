@@ -3,6 +3,13 @@
   "version": "0.6.0",
   "description": "Eval expressions in AST",
   "main": "index.js",
+  "files": [
+    "index.js",
+    "array.js",
+    "string.js",
+    "util.js",
+    "expression.js"
+  ],
   "scripts": {
     "test": "mocha"
   },
