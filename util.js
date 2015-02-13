@@ -8,11 +8,10 @@ var analyze = require('escope').analyze;
 var q = require('esquery');
 var types = require('ast-types');
 var n = types.namedTypes, b = types.builders;
-var isPrimitive = require('is-primitive');
 var evalAst = require('./');
 
 
-/** Test whether node is literal or contains only literals  */
+/** Test whether node is literal or contains only [known beforehead] literals */
 function isSimple(node){
 	if (n.Literal.check(node)) return true;
 	if (n.UnaryExpression.check(node)) return isSimple(node.argument);
@@ -66,6 +65,7 @@ function isObject(node){
 
 
 /** Check whether function doesn’t use external variables */
+//FIXME: actually check that function has no assignment expressions to external vars, or doesn’t use them in any way.
 function isIsolated(node){
 	//refuse non-fn nodes
 	if (!n.FunctionExpression.check(node)) return;

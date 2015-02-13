@@ -1,7 +1,7 @@
 {
   "name": "ast-eval",
   "version": "0.6.3",
-  "description": "Eval expressions in AST",
+  "description": "Optimize AST by evaling analyzable expressions",
   "main": "index.js",
   "files": [
     "index.js",
@@ -31,7 +31,9 @@
     "estools",
     "eval",
     "es-eval",
-    "eseval"
+    "eseval",
+    "preeval",
+    "pre-eval"
   ],
   "author": "Deema Ywanov <df.creative@gmail.com>",
   "license": "Unlicensed",

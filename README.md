@@ -30,7 +30,7 @@ gen(ast); //'[1, false, 43, false]'
 * Logical expressions
 	* `{a:1} && {b:2}` → `true`
 
-* Simple arrays
+* Simple arrays (ccjs doesn’t manage to do that)
 	* `[1,2,3].concat(4, [5])` → `[1,2,3,4,5]`
 	* `[1,2,3].map(function(x){ return x*2})` → `[2,4,6]`
 	* `['a', 'b', 'c'].join(' ')` → `'a b c'`
@@ -46,6 +46,29 @@ gen(ast); //'[1, false, 43, false]'
 
 * [pending] Eval small loops
 	* `var x = []; for (var i = 0; i < 10; i++) {x[i] = 10*i;}`
+
+* [pending] Detect constants
+	* `var x = 1; x + 2;` → `3;`
+
+* [pending] Unwrap proxy functions
+
+* [pending] remove unused props
+
+* [pending] remove dead code
+	* Empty isolated functions
+
+* [pending] detect & collapse clones
+
+
+## Options
+
+[pending]
+
+| Option | Default value | Description |
+|---|---|---|
+| optimal | `false` | Ignore eval results lengthen than initial source code |
+| decompute | `false` | Try to evaluate computed properties |
+| externs | `{}` | External constant values or functions |
 
 
 [![NPM](https://nodei.co/npm/ast-eval.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/ast-eval/)
