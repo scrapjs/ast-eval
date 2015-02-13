@@ -1,5 +1,7 @@
 /**
- * Eval expressions
+ * Eval expressions in AST.
+ *
+ * @module ast-eval
  */
 
 var types = require('ast-types');
@@ -14,59 +16,46 @@ function astEval(ast){
 
 			var node = path.node;
 
-			//handle binary expressions
+			//logical expressions
+			//can cast nested object even with custom .valueOf or inner variables
 			if (
-				(n.BinaryExpression.check(node) || n.LogicalExpression.check(node)) &&
-				(isPlainValue(node.left) && isPlainValue(node.right))
+				n.LogicalExpression.check(node) &&
+				(isObject(node.left) || isSimple(node.left)) &&
+				(isObject(node.right) || isSimple(node.left))
 			) {
-				var leftValue = eval(gen(node.left)),
-					rightValue = eval(gen(node.right)),
-					value;
+				return b.literal(eval(gen(node)));
+			}
 
-				var op = node.operator;
-
-				if (op === "==") value = leftValue == rightValue;
-				if (op === "!=") value = leftValue != rightValue;
-				if (op === "===") value = leftValue === rightValue;
-				if (op === "!==") value = leftValue !== rightValue;
-				if (op === "<") value = leftValue < rightValue;
-				if (op === "<=") value = leftValue <= rightValue;
-				if (op === ">") value = leftValue > rightValue;
-				if (op === ">=") value = leftValue >= rightValue;
-				if (op === "<<") value = leftValue << rightValue;
-				if (op === ">>") value = leftValue >> rightValue;
-				if (op === ">>>") value = leftValue >>> rightValue;
-				if (op === "+") value = leftValue + rightValue;
-				if (op === "-") value = leftValue - rightValue;
-				if (op === "*") value = leftValue * rightValue;
-				if (op === "/") value = leftValue / rightValue;
-				if (op === "%") value = leftValue % rightValue;
-				if (op === "|") value = leftValue | rightValue;
-				if (op === "^") value = leftValue ^ rightValue;
-				if (op === "&") value = leftValue & rightValue;
-				if (op === "instanceof") value = leftValue instanceof rightValue;
-				// if (op === "..") value = leftValue .. rightValue;
-
-				if (op === "||") value = leftValue || rightValue;
-				if (op === "&&") value = leftValue && rightValue;
-
-				path.replace(b.literal(value));
+			//binary expressions
+			//calls .valueOf or .toString on objects
+			//so pass only literals && simple objects
+			if (
+				n.BinaryExpression.check(node) &&
+				isSimple(node.left) &&
+				isSimple(node.right)
+			) {
+				return b.literal(eval(gen(node)));
 			}
 		}
 	});
 
-
 	return ast;
 }
 
-/**
- * Check whether node contains no nested variable literals
- */
-function isPlainValue(node){
+function isObject(node){
+	if (n.ArrayExpression.check(node)) return true;
+	if (n.ObjectExpression.check(node)) return true;
+	if (n.FunctionExpression.check(node)) return true;
+	if (n.ThisExpression.check(node)) return true;
+}
+
+/** Check object contains only literals */
+function isSimple(node){
 	if (n.Literal.check(node)) return true;
-	if (n.ArrayExpression.check(node)) {
-		return node.elements.every(isPlainValue);
-	}
+	if (n.ArrayExpression.check(node)) return node.elements.every(isSimple);
+	if (n.ObjectExpression.check(node)) return node.properties.every(function(prop){
+		return isSimple(prop.value);
+	});
 }
 
 

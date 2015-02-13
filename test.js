@@ -4,7 +4,7 @@
  */
 var assert = require('chai').assert;
 var esprima = require('esprima');
-var escodegen = require('escodegen');
+var gen = require('escodegen').generate;
 var astEval = require('./');
 
 
@@ -12,13 +12,13 @@ var astEval = require('./');
 
 describe('Eseval', function(){
 	it('boolean', function(){
-		var src = '[1===2+3-16/4, [2]==2, [2]!==2, [2]!==[2]]';
+		var src = '[1 && true, 1===2+3-16/4, [2]==2, [2]!==2, [2]!==[2]]';
 		var ast = esprima.parse(src);
 
 		ast = astEval(ast);
-		var out = escodegen.generate(ast);
+		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
-		assert.deepEqual(eval(out), [true, true, true, true]);
+		assert.deepEqual(out, '[true,true,true,true,true];');
 	});
 
 	it.skip('unresolved', function(){
@@ -26,18 +26,28 @@ describe('Eseval', function(){
 		var ast = esprima.parse(src);
 
 		ast = astEval(ast);
-		var out = escodegen.generate(ast);
+		var out = gen(ast);
 		console.log(out)
 
 		// assert.deepEqual(eval(out), [true, true, true, true]);
 	});
 
 	it('resolved', function(){
+		var src = '[1,2=="2",3.1+4*10+(2.14||6),""+"x", 2 > 4, [] + []]';
+		var ast = esprima.parse(src);
+
+		ast = astEval(ast);
+		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
+
+		assert.deepEqual(out, "[1,true,45.24,'x',false,''];");
+	});
+
+	it.skip('property getter', function(){
 		var src = '[1,2=="2",3.1+4*10+(2.14||6),""+"x"]';
 		var ast = esprima.parse(src);
 
 		ast = astEval(ast);
-		var out = escodegen.generate(ast);
+		var out = gen(ast);
 
 		assert.deepEqual(eval(out), [1, true, 45.24, 'x']);
 	});
@@ -50,9 +60,8 @@ describe('Eseval', function(){
 
 	it('decalc props');
 
-	it('property getter');
 
-	it('property getter');
+	it('decalculated properties');
 
 	it.skip('scoped variables', function(){
 		'[1,2,3+4*10+(n||6),foo(3+5),obj[""+"x"].y]';
