@@ -7,34 +7,88 @@
 var types = require('ast-types');
 var n = types.namedTypes, b = types.builders;
 var gen = require('escodegen').generate;
+var parse = require('esprima').parse;
 
 function astEval(ast){
 	types.visit(ast, {
-		visitExpression: function(path){
-			//go deep first
+		visitLogicalExpression: function(path){
 			this.traverse(path);
-
 			var node = path.node;
 
-			//logical expressions
 			//can cast nested object even with custom .valueOf or inner variables
-			if (
-				n.LogicalExpression.check(node) &&
-				(isObject(node.left) || isSimple(node.left)) &&
+			if ((isObject(node.left) || isSimple(node.left)) &&
 				(isObject(node.right) || isSimple(node.left))
 			) {
 				return b.literal(eval(gen(node)));
 			}
+		},
 
-			//binary expressions
+
+		visitBinaryExpression: function(path){
+			this.traverse(path);
+			var node = path.node;
+
 			//calls .valueOf or .toString on objects
 			//so pass only literals && simple objects
-			if (
-				n.BinaryExpression.check(node) &&
-				isSimple(node.left) &&
+			if (isSimple(node.left) &&
 				isSimple(node.right)
 			) {
 				return b.literal(eval(gen(node)));
+			}
+		},
+
+
+		visitCallExpression: function(path){
+			this.traverse(path);
+			var node = path.node;
+
+			//simple array method call
+			if (n.MemberExpression.check(node.callee) &&
+				n.ArrayExpression.check(node.callee.object) &&
+				isSimple(node.callee.object)
+			) {
+				var method;
+
+				//method, accepting fn
+				if (method = [
+						'every',
+						'map',
+						'filter',
+						'find',
+						'findIndex',
+						'reduce',
+						'reduceRight',
+						'some',
+						'sort'
+					].indexOf(node.callee.property.name) >= 0 &&
+					node.arguments.every(isSimple)
+				) {
+
+				}
+
+				//method, accepting simple arguments
+				if (method = [
+						'copyWithin',
+						'includes',
+						'indexOf',
+						'join',
+						'lastIndexOf',
+						'concat',
+						'push',
+						'pop',
+						'reverse',
+						'shift',
+						'slice',
+						'splice',
+						'toSource',
+						'toString',
+						'unshift'
+					].indexOf(node.callee.property.name >= 0) &&
+					node.arguments.every(isSimple)
+				) {
+					//eval array, return recreated evaled value
+					return parse(JSON.stringify(eval(gen(node)))).body[0].expression;
+				}
 			}
 		}
 	});
@@ -56,6 +110,12 @@ function isSimple(node){
 	if (n.ObjectExpression.check(node)) return node.properties.every(function(prop){
 		return isSimple(prop.value);
 	});
+}
+
+
+/** Checks whether function doesn’t use external variables */
+function isIsolated(node){
+
 }
 
 

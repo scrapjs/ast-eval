@@ -69,7 +69,23 @@ describe('Eseval', function(){
 	});
 
 	it.skip('array methods', function(){
-		'[1, 2, 3].map(function(n) { return n * 2 })'
+		var src = '[1, 2, 3].map(function(n) { return n * 2 })';
+		var ast = esprima.parse(src);
+
+		ast = astEval(ast);
+		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
+
+		assert.deepEqual(out, "[2,4,6];");
+	});
+
+	it('array mutators', function(){
+		var src = '[1, 2, 3].concat(4, [5])';
+		var ast = esprima.parse(src);
+
+		ast = astEval(ast);
+		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
+
+		assert.deepEqual(out, "[1,2,3,4,5];");
 	});
 });
 
