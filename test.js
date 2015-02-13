@@ -3,7 +3,7 @@
  * https://github.com/substack/static-eval/blob/master/test/eval.js
  */
 var assert = require('chai').assert;
-var esprima = require('esprima');
+var parse = require('esprima').parse;
 var gen = require('escodegen').generate;
 var astEval = require('./');
 var u = require('./util');
@@ -14,7 +14,7 @@ var u = require('./util');
 describe('Expressions', function(){
 	it('boolean', function(){
 		var src = '[1 && true, 1===2+3-16/4, [2]==2, [2]!==2, [2]!==[2]]';
-		var ast = esprima.parse(src);
+		var ast = parse(src);
 
 		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
@@ -24,7 +24,7 @@ describe('Expressions', function(){
 
 	it.skip('unresolved', function(){
 		var src = '[1,2,3+4*10*z+n,foo(3+5),obj[""+"x"].y]';
-		var ast = esprima.parse(src);
+		var ast = parse(src);
 
 		ast = astEval(ast);
 		var out = gen(ast);
@@ -35,7 +35,7 @@ describe('Expressions', function(){
 
 	it('resolved', function(){
 		var src = '[1,2=="2",3.1+4*10+(2.14||6),""+"x", 2 > 4, [] + []]';
-		var ast = esprima.parse(src);
+		var ast = parse(src);
 
 		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
@@ -43,9 +43,14 @@ describe('Expressions', function(){
 		assert.deepEqual(out, "[1,true,45.24,'x',false,''];");
 	});
 
+	it('proper order', function(){
+		'1 + 2 * 3';
+		'2 * 3 + 1';
+	});
+
 	it.skip('property getter', function(){
 		var src = '[1,2=="2",3.1+4*10+(2.14||6),""+"x"]';
-		var ast = esprima.parse(src);
+		var ast = parse(src);
 
 		ast = astEval(ast);
 		var out = gen(ast);
@@ -71,14 +76,24 @@ describe('Expressions', function(){
 
 
 describe('Array', function(){
-	it('transforms', function(){
+	it('map', function(){
 		var src = '[1, 2, 3].map(function(n) {return n * 2 })';
-		var ast = esprima.parse(src);
+		var ast = parse(src);
 
-		ast = astEval(ast);
+		ast = astEval.array(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "[2,4,6];");
+	});
+
+	it('concat', function(){
+		var src = '[1, 2, 3].concat(4, [5], {}, function(){})';
+		var ast = parse(src);
+
+		ast = astEval.array(ast);
+		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
+
+		assert.deepEqual(out, "[1,2,3,4,5,{},function () {}];");
 	});
 
 	it.skip('unresolvable transforms', function(){
@@ -88,9 +103,9 @@ describe('Array', function(){
 
 	it('mutators', function(){
 		var src = '[1, 2, 3].concat(4, [5])';
-		var ast = esprima.parse(src);
+		var ast = parse(src);
 
-		ast = astEval(ast);
+		ast = astEval.array(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "[1,2,3,4,5];");
@@ -101,11 +116,11 @@ describe('Array', function(){
 		'[1, 2, 3].concat(4, [x])'
 	});
 
-	it('methods', function(){
+	it('join', function(){
 		var src = '["a", "b", "c"].join(" ")';
-		var ast = esprima.parse(src);
+		var ast = parse(src);
 
-		ast = astEval(ast);
+		ast = astEval.array(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "'a b c';");
@@ -117,7 +132,7 @@ describe('Array', function(){
 describe('Decompute', function(){
 	it('decompute', function(){
 		var src = 'a["x"] = 1;';
-		var ast = esprima.parse(src);
+		var ast = parse(src);
 
 		ast = u.decompute(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
@@ -130,7 +145,7 @@ describe('Decompute', function(){
 describe('Math', function(){
 	it('functions', function(){
 		var src = 'Math.sin(Math.PI / 2)';
-		var ast = esprima.parse(src);
+		var ast = parse(src);
 
 		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
@@ -141,11 +156,25 @@ describe('Math', function(){
 
 
 describe('String', function(){
-	it('methods', function(){
+	it('prototype methods', function(){
 		var src = '"a_b_c".split("_")';
-		var ast = esprima.parse(src);
+		var ast = parse(src);
 
-		ast = astEval(ast);
+		ast = astEval.string(ast);
+		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
+
+		assert.deepEqual(out, "['a','b','c'];");
+	});
+
+	it.skip('refuse methods', function(){
+		'"a".badMethod'
+	});
+
+	it('static methods', function(){
+		var src = '"a_b_c".split("_")';
+		var ast = parse(src);
+
+		ast = astEval.string(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "['a','b','c'];");

@@ -11,9 +11,8 @@ var types = require('ast-types');
 var n = types.namedTypes, b = types.builders;
 var gen = require('escodegen').generate;
 var parse = require('esprima').parse;
-var isSimple = require('./util').isSimple;
-var isIsolated = require('./util').isIsolated;
-var isObject = require('./util').isObject;
+var u = require('./util');
+var uneval = require('tosource');
 
 
 function evalArray(ast){
@@ -22,54 +21,22 @@ function evalArray(ast){
 			this.traverse(path);
 			var node = path.node;
 
+			//FIXME: generalize grasping call expressions: static methods, .apply etc
+
 			//simple array method call
 			if (n.MemberExpression.check(node.callee) &&
 				n.ArrayExpression.check(node.callee.object) &&
-				isSimple(node.callee.object)
+				u.isSimple(node.callee.object)
 			) {
-				var method;
-
-				//method, accepting fn
-				if (method = [
-						'every',
-						'map',
-						'filter',
-						'find',
-						'findIndex',
-						'reduce',
-						'reduceRight',
-						'some',
-						'sort'
-					].indexOf(node.callee.property.name) >= 0 &&
-					n.FunctionExpression.check(node.arguments[0]) &&
-					isIsolated(node.arguments[0])
-				) {
-					//eval array, return recreated evaled value
-					return parse(JSON.stringify(eval(gen(node)))).body[0].expression;
-				}
-
 				//method, accepting simple arguments
-				if (method = [
-						'copyWithin',
-						'includes',
-						'indexOf',
-						'join',
-						'lastIndexOf',
-						'concat',
-						'push',
-						'pop',
-						'reverse',
-						'shift',
-						'slice',
-						'splice',
-						'toSource',
-						'toString',
-						'unshift'
-					].indexOf(node.callee.property.name >= 0) &&
-					node.arguments.every(isSimple)
+				if (
+					(node.callee.property.name in Array.prototype) &&
+					node.arguments.every(function(node){
+						return u.isSimple(node) || u.isIsolated(node);
+					})
 				) {
 					//eval array, return recreated evaled value
-					return parse(JSON.stringify(eval(gen(node)))).body[0].expression;
+					return parse(uneval(eval(gen(node)))).body[0].expression;
 				}
 			}
 		}

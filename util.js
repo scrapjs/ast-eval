@@ -35,6 +35,9 @@ function isObject(node){
 
 /** Checks whether function doesn’t use external variables */
 function isIsolated(node){
+	//refuse non-fn nodes
+	if (!n.FunctionExpression.check(node)) return;
+
 	//if node refers to external vars - not isolated
 	var scope = analyze(node).scopes[0];
 	if (scope.through.length) return;
@@ -66,7 +69,7 @@ function decompute(node){
 	return node;
 }
 
-
+exports.isString = isString;
 exports.isSimple = isSimple;
 exports.isObject = isObject;
 exports.isIsolated = isIsolated;

@@ -11,6 +11,9 @@ var evalMath = require('./math');
 var evalString = require('./string');
 
 
+/**
+ * Cumulatively eval AST, eval all possible evaluable things
+ */
 function evalAst(node){
 
 	//FIXME: eval till no node has changed
@@ -25,5 +28,11 @@ function evalAst(node){
 	node = evalExp(node);
 	return node;
 }
+
+
+evalAst.expression = evalExp;
+evalAst.array = evalArray;
+evalAst.math = evalMath;
+evalAst.string = evalString;
 
 module.exports = evalAst;
