@@ -1,7 +1,7 @@
 {
   "name": "ast-eval",
   "version": "0.6.4",
-  "description": "Optimize AST by evaling analyzable expressions",
+  "description": "Evaluate statically evaluable parts of AST",
   "main": "index.js",
   "files": [
     "index.js",
