@@ -1,6 +1,6 @@
 {
   "name": "ast-eval",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Eval expressions in AST",
   "main": "index.js",
   "scripts": {
