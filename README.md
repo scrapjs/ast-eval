@@ -15,7 +15,7 @@ var esprima = require('esprima');
 var gen = require('escodegen').generate;
 var astEval = require('ast-eval');
 
-var ast = esprima.parse('[1, 2 == "2", 3+4*10, [2]==2]');
+var ast = esprima.parse('[1, 2 === "2", 3+4*10, [2] === 2]');
 ast = astEval(ast);
 
 gen(ast); //'[1, false, 43, false]'
