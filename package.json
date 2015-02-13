@@ -41,6 +41,7 @@
     "escodegen": "^1.6.1",
     "ast-types": "^0.6.12",
     "escope": "~2.0.4",
-    "esquery": "~0.3.0"
+    "esquery": "~0.3.0",
+    "clone": "~1.0.0"
   }
 }

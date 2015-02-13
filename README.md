@@ -23,22 +23,28 @@ gen(ast); //'[1, false, 43, false]'
 
 ## Features
 
-* Eval simple maths
+* Binary expressions
 `1000 * 60 * 60` → `3600000`
 
-* Eval logical expressions
+* Logical expressions
 `{a:1} && {b:2}` → `true`
 
-* Eval simple arrays methods
+* Simple arrays
 `[1,2,3].concat(4, [5])` → `[1,2,3,4,5]`
 `[1,2,3].map(function(x){ return x*2})` → `[2,4,6]`
 `['a', 'b', 'c'].join(' ')` → `'a b c'`
 
-* Eval `Math` module expressions
+* `Math` module expressions
 `Math.sin(Math.Pi / 2 )` → 1
 
-*
+* Decompute object access (optionally)
+`a['x'] = 1` → `a.x = 1`
 
+* String expressions
+`'a b c'.split(' ')` → `['a', 'b', 'c']`
+
+* Shorten number notation
+`1000` → `1e3`
 
 
 [![NPM](https://nodei.co/npm/ast-eval.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/ast-eval/)

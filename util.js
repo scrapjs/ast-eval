@@ -19,6 +19,10 @@ function isSimple(node){
 	});
 }
 
+function isString(node){
+	if (n.Literal.check(node) && typeof node.value === 'string') return true;
+}
+
 
 /** Test whether node is object */
 function isObject(node){
@@ -42,6 +46,28 @@ function isIsolated(node){
 }
 
 
+/** Return similar member expression with decalculated properties */
+function decompute(node){
+	types.visit(node, {
+		visitMemberExpression: function(path){
+			//resolve deep first
+			this.traverse(path);
+			var node = path.node;
+
+			if (node.computed &&
+				isString(node.property)
+			) {
+				node.computed = false;
+				path.get('property').replace(b.identifier(node.property.value));
+			}
+		}
+	});
+
+	return node;
+}
+
+
 exports.isSimple = isSimple;
 exports.isObject = isObject;
 exports.isIsolated = isIsolated;
+exports.decompute = decompute;

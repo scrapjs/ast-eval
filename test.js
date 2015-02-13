@@ -6,6 +6,7 @@ var assert = require('chai').assert;
 var esprima = require('esprima');
 var gen = require('escodegen').generate;
 var astEval = require('./');
+var u = require('./util');
 
 
 // var src = '[1, 2, 3+4*10+n, 3+4*10+(n||6), beep.boop(3+5), obj[""+"x"].y, 1===2+3-16/4, [2]==2, [2]!==2, [2]!==[2]]';
@@ -67,6 +68,8 @@ describe('Expressions', function(){
 	});
 });
 
+
+
 describe('Array', function(){
 	it('transforms', function(){
 		var src = '[1, 2, 3].map(function(n) {return n * 2 })';
@@ -108,6 +111,45 @@ describe('Array', function(){
 		assert.deepEqual(out, "'a b c';");
 	});
 
+});
+
+
+describe('Decompute', function(){
+	it('decompute', function(){
+		var src = 'a["x"] = 1;';
+		var ast = esprima.parse(src);
+
+		ast = u.decompute(ast);
+		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
+
+		assert.deepEqual(out, "a.x = 1;");
+	});
+});
+
+
+describe('Math', function(){
+	it('functions', function(){
+		var src = 'Math.sin(Math.PI / 2)';
+		var ast = esprima.parse(src);
+
+		ast = astEval(ast);
+		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
+
+		assert.deepEqual(out, "1;");
+	});
+});
+
+
+describe('String', function(){
+	it('methods', function(){
+		var src = '"a_b_c".split("_")';
+		var ast = esprima.parse(src);
+
+		ast = astEval(ast);
+		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
+
+		assert.deepEqual(out, "['a','b','c'];");
+	});
 });
 
 	// it('loops')
