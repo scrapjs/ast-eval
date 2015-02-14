@@ -200,7 +200,7 @@ describe('String', function(){
 		var src = '"a_b_c".split("_")';
 		var ast = parse(src);
 
-		ast = astEval.string(ast);
+		ast = astEval.expression(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "['a','b','c'];");
@@ -214,7 +214,7 @@ describe('String', function(){
 		var src = '"".split.call("a_b_c", "_")';
 		var ast = parse(src);
 
-		ast = astEval.string(ast);
+		ast = astEval.expression(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "['a','b','c'];");
@@ -226,7 +226,7 @@ describe('String', function(){
 		var src = 'String.prototype.split.call("a_b_c", "_")';
 		var ast = parse(src);
 
-		ast = astEval.string(ast);
+		ast = astEval.expression(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "['a','b','c'];");
