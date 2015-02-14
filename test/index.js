@@ -5,8 +5,8 @@
 var assert = require('chai').assert;
 var parse = require('esprima').parse;
 var gen = require('escodegen').generate;
-var astEval = require('./');
-var u = require('./util');
+var astEval = require('../');
+var u = require('../lib/util');
 
 
 // var src = '[1, 2, 3+4*10+n, 3+4*10+(n||6), beep.boop(3+5), obj[""+"x"].y, 1===2+3-16/4, [2]==2, [2]!==2, [2]!==[2]]';

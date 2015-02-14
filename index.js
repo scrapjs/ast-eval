@@ -5,17 +5,16 @@
  * @module ast-eval
  */
 
-var evalExp = require('./expression');
-var evalArray = require('./array');
-var evalString = require('./string');
+var evalExp = require('./lib/expression');
+var evalArray = require('./lib/array');
+var evalString = require('./lib/string');
 
 
 /**
  * Cumulatively eval AST, eval all possible evaluable things
  */
 function evalAst(node){
-	node = evalArray(node);
-	node = evalExp(node);
+	throw Error('Unimplemented');
 	return node;
 }
 
