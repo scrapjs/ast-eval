@@ -24,45 +24,45 @@ gen(ast); //'[1, false, 43, false]'
 
 ## Features
 
-* Binary expressions
-	* `1000 * 60 * 60` → `36e6`
+* [x] Binary expressions
+	* [x] `1000 * 60 * 60` → `36e6`
 
-* Logical expressions
-	* `{a:1} && {b:2}` → `true`
+* [x] Logical expressions
+	* [x] `{a:1} && {b:2}` → `true`
 
-* Simple arrays (ccjs doesn’t manage to do that)
-	* `[1,2,3].concat(4, [5])` → `[1,2,3,4,5]`
-	* `[1,2,3].map(function(x){ return x*2})` → `[2,4,6]`
-	* `['a', 'b', 'c'].join(' ')` → `'a b c'`
+* [x] Simple arrays (ccjs doesn’t manage to do that)
+	* [x] `[1,2,3].concat(4, [5])` → `[1,2,3,4,5]`
+	* [x] `[1,2,3].map(function(x){ return x*2})` → `[2,4,6]`
+	* [x] `['a', 'b', 'c'].join(' ')` → `'a b c'`
 
-* `Math` module expressions
-	* `Math.sin(Math.Pi / 2 )` → `1`
+* [x] `Math` module expressions
+	* [x] `Math.sin(Math.Pi / 2 )` → `1`
 
-* Any other static environment evaluations
-	* `Crypto`
-	* [TODO]
+* [ ] Any other static environment evaluations
+	* [ ] `Crypto`
+	* [ ] ...
 
-* Decompute object access (optionally)
-	* `a['x'] = 1` → `a.x = 1`
+* [x] Decompute object access (optionally)
+	* [x] `a['x'] = 1` → `a.x = 1`
 
-* String expressions
-	* `'a b c'.split(' ')` → `['a', 'b', 'c']`
+* [ ] String expressions
+	* [ ] `'a b c'.split(' ')` → `['a', 'b', 'c']`
 
-* [pending] Eval small loops
-	* `var x = []; for (var i = 0; i < 10; i++) {x[i] = 10*i;}`
+* [ ] Eval small loops
+	* [ ] `var x = []; for (var i = 0; i < 10; i++) {x[i] = 10*i;}`
 
-* [pending] Substitute constants
-	* `var x = 1; x + 2;` → `3;`
+* [ ] Substitute constants
+	* [ ] `var x = 1; x + 2;` → `3;`
 
-* [pending] Unwrap proxy functions
+* [ ] Unwrap proxy functions
 
-* [pending] remove unused props
+* [ ] Remove unused props
 
-* [pending] remove dead code
-	* Empty isolated functions
-	* Remove unused variables (after enabling constants)
+* [ ] Undead code
+	* [ ] Empty isolated functions
+	* [ ] Remove unused variables (after enabling constants)
 
-* [pending] detect & collapse clones
+* [ ] Detect & collapse clones
 
 
 ## Options
