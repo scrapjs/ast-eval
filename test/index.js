@@ -113,20 +113,20 @@ describe('Array', function(){
 		var src = '[1, 2, 3].map(function(n) {return n * 2 })';
 		var ast = parse(src);
 
-		ast = astEval.array(ast);
+		ast = astEval.expression(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "[2,4,6];");
 	});
 
 	it('concat', function(){
-		var src = '[1, 2, 3].concat(4, [5], {}, function(){})';
+		var src = '[1, 2,, 3].concat(4, [5], {}, {a: 2}, function(){}, function(){x + 1})';
 		var ast = parse(src);
 
-		ast = astEval.array(ast);
+		ast = astEval.expression(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
-		assert.deepEqual(out, "[1,2,3,4,5,{},function () {}];");
+		assert.deepEqual(out, "[1,2,,3,4,5,{},{ a: 2 },function () {},function () {x + 1;}];");
 	});
 
 	it.skip('unresolvable transforms', function(){
@@ -138,7 +138,7 @@ describe('Array', function(){
 		var src = '[1, 2, 3].concat(4, [5])';
 		var ast = parse(src);
 
-		ast = astEval.array(ast);
+		ast = astEval.expression(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "[1,2,3,4,5];");
@@ -153,7 +153,7 @@ describe('Array', function(){
 		var src = '["a", "b", "c"].join(" ")';
 		var ast = parse(src);
 
-		ast = astEval.array(ast);
+		ast = astEval.expression(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "'a b c';");
