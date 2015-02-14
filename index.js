@@ -18,7 +18,7 @@ var extend = require('xtend/mutable');
 /** Default options */
 var defaults = {
 	optimize: false,
-	decompute: false,
+	computeProps: false,
 	externs: {}
 };
 

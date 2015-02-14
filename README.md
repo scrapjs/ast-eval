@@ -22,6 +22,15 @@ gen(ast); //'[1, false, 43, false]'
 ```
 
 
+## Options
+
+| Option | Default value | Description |
+|---|---|---|
+| optimize | `false` | Ignore eval results lengthen than initial source code |
+| computeProps | `false` | Try to evaluate `computed` properties |
+| externs | `{}` | External constant values or functions |
+
+
 ## Features
 
 * [x] Binary expressions
@@ -63,15 +72,6 @@ gen(ast); //'[1, false, 43, false]'
 	* [ ] Remove unused variables (after enabling constants)
 
 * [ ] Detect & collapse clones
-
-
-## Options
-
-| Option | Default value | Description |
-|---|---|---|
-| optimal | `false` | Ignore eval results lengthen than initial source code |
-| decompute | `false` | Try to evaluate computed properties |
-| externs | `{}` | External constant values or functions |
 
 
 ## Precautions
