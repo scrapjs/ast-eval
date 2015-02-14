@@ -238,6 +238,30 @@ describe('loops', function(){
 });
 
 
+describe('Substitute constants', function(){
+	it.skip('same scope call', function(){
+		var src = 'var a = 1; var b = a + 1;';
+		var ast = parse(src);
+
+		ast = astEval.expression(ast);
+		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
+
+		assert.deepEqual(out, "var a = 1; var b = 2;");
+	});
+
+	it.skip('ignore substitution', function(){
+
+	});
+});
+
+
+describe('Substitute functions', function(){
+	it('isolated definition & call', function(){
+
+	});
+});
+
+
 
 
 assert.equal();

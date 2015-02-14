@@ -13,21 +13,15 @@ var isIsolated = require('./util').isIsolated;
 var isObject = require('./util').isObject;
 var parse = require('esprima').parse;
 var uneval = require('tosource');
-
+var analyze = require('escope').analyze;
 
 function evalExp(ast){
+	var scopes = analyze(ast);
+
 	types.visit(ast, {
+		/** Catch entry nodes for optimizations */
 		visitExpression: function(path){
 			var node = path.node;
-
-			//can cast nested object even with custom .valueOf or inner variables
-			if (
-				n.LogicalExpression.check(node) &&
-				(isObject(node.left) || isSimple(node.left)) &&
-				(isObject(node.right) || isSimple(node.left))
-			) {
-				return b.literal(eval(gen(node)));
-			}
 
 			//calls .valueOf or .toString on objects
 			//so pass only literals && simple objects

@@ -38,6 +38,10 @@ gen(ast); //'[1, false, 43, false]'
 * `Math` module expressions
 	* `Math.sin(Math.Pi / 2 )` → `1`
 
+* Any other static environment evaluations
+	* `Crypto`
+	* [TODO]
+
 * Decompute object access (optionally)
 	* `a['x'] = 1` → `a.x = 1`
 
@@ -47,7 +51,7 @@ gen(ast); //'[1, false, 43, false]'
 * [pending] Eval small loops
 	* `var x = []; for (var i = 0; i < 10; i++) {x[i] = 10*i;}`
 
-* [pending] Detect constants
+* [pending] Substitute constants
 	* `var x = 1; x + 2;` → `3;`
 
 * [pending] Unwrap proxy functions
@@ -56,6 +60,7 @@ gen(ast); //'[1, false, 43, false]'
 
 * [pending] remove dead code
 	* Empty isolated functions
+	* Remove unused variables (after enabling constants)
 
 * [pending] detect & collapse clones
 
@@ -69,6 +74,11 @@ gen(ast); //'[1, false, 43, false]'
 | optimal | `false` | Ignore eval results lengthen than initial source code |
 | decompute | `false` | Try to evaluate computed properties |
 | externs | `{}` | External constant values or functions |
+
+
+## Precautions
+
+* Ast-eval takes supposation that native environment hasn’t been changed and built-ins have it’s original or polyfilled methods. If you redefine the builtins, like with [sugar.js]() or similar library - make sure to provide it as externs.
 
 
 [![NPM](https://nodei.co/npm/ast-eval.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/ast-eval/)

@@ -11,11 +11,21 @@ var n = types.namedTypes, b = types.builders;
 var evalAst = require('./');
 
 
-/** Test whether node is literal or contains only [known beforehead] literals */
+/**
+ * Test whether node is statically evaluable, in general.
+ * Specifically that it is literal or contains only statically known literals.
+ *
+ * @param {Node} node AST Node to test
+ *
+ * @return {Boolean} Test result
+ */
 function isSimple(node){
 	if (n.Literal.check(node)) return true;
 	if (n.UnaryExpression.check(node)) return isSimple(node.argument);
-	if (n.LogicalExpression.check(node)) return isSimple(node.left) && isSimple(node.right);
+	if (n.LogicalExpression.check(node)) {
+		return  (isObject(node.left) || isSimple(node.left)) &&
+				(isObject(node.right) || isSimple(node.left));
+	}
 	if (n.BinaryExpression.check(node)) return isSimple(node.left) && isSimple(node.right);
 	if (n.ConditionalExpression.check(node)) return isSimple(node.test) && isSimple(node.alternate) && isSimple(node.consequent);
 	if (n.SequenceExpression.check(node)) return node.expressions.every(isSimple);
@@ -49,6 +59,7 @@ function isSimple(node){
 		}
 	}
 }
+
 
 function isString(node){
 	if (n.Literal.check(node) && typeof node.value === 'string') return true;
