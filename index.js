@@ -6,7 +6,6 @@
  */
 
 var evalExp = require('./lib/expression');
-var evalArray = require('./lib/array');
 var evalString = require('./lib/string');
 
 
@@ -20,7 +19,6 @@ function evalAst(node){
 
 
 evalAst.expression = evalExp;
-evalAst.array = evalArray;
 evalAst.string = evalString;
 
 module.exports = evalAst;
