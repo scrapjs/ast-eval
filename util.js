@@ -7,7 +7,7 @@ var analyze = require('escope').analyze;
 var q = require('esquery');
 var types = require('ast-types');
 var n = types.namedTypes, b = types.builders;
-var evalAst = require('../');
+var evalAst = require('./');
 var parse = require('esprima').parse;
 var uneval = require('tosource');
 var gen = require('escodegen').generate;

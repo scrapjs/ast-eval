@@ -4,11 +4,10 @@
   "description": "Statically evaluate AST",
   "main": "index.js",
   "files": [
-    "*.js",
-    "lib"
+    "*.js"
   ],
   "directories": {
-    "lib": "lib"
+    "test": "test"
   },
   "scripts": {
     "test": "mocha"

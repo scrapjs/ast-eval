@@ -6,7 +6,7 @@ var assert = require('chai').assert;
 var parse = require('esprima').parse;
 var gen = require('escodegen').generate;
 var astEval = require('../');
-var u = require('../lib/util');
+var u = require('../util');
 
 
 // var src = '[1, 2, 3+4*10+n, 3+4*10+(n||6), beep.boop(3+5), obj[""+"x"].y, 1===2+3-16/4, [2]==2, [2]!==2, [2]!==[2]]';
@@ -16,7 +16,7 @@ describe('Expressions', function(){
 		var src = '[1 && true, 1===2+3-16/4, [2]==2, [2]!==2, [2]!==[2]]';
 		var ast = parse(src);
 
-		ast = astEval.expression(ast);
+		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, '[true,true,true,true,true];');
@@ -26,7 +26,7 @@ describe('Expressions', function(){
 		var src = '[1,2,3+4*10*z+n,foo(3+5),obj[""+"x"].y]';
 		var ast = parse(src);
 
-		ast = astEval.expression(ast);
+		ast = astEval(ast);
 		var out = gen(ast);
 		console.log(out)
 
@@ -37,7 +37,7 @@ describe('Expressions', function(){
 		var src = '[1,2=="2",3.1+4*10+(2.14||6),""+"x", 2 > 4, [] + []]';
 		var ast = parse(src);
 
-		ast = astEval.expression(ast);
+		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "[1,true,45.24,'x',false,''];");
@@ -46,12 +46,12 @@ describe('Expressions', function(){
 	it('proper order', function(){
 		var src1 = '1 + 2 * 3';
 		var ast1 = parse(src1);
-		ast1 = astEval.expression(ast1);
+		ast1 = astEval(ast1);
 		var out1 = gen(ast1, {format: {indent: {style: ''}, newline: ''}});
 
 		var src2 = '2 * 3 + 1';
 		var ast2 = parse(src2);
-		ast2 = astEval.expression(ast2);
+		ast2 = astEval(ast2);
 		var out2 = gen(ast1, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.equal(out1, out2);
@@ -61,7 +61,7 @@ describe('Expressions', function(){
 	it('unary operator', function(){
 		var src = '-1 + 2';
 		var ast = parse(src);
-		ast = astEval.expression(ast);
+		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.equal(out, '1;');
@@ -70,7 +70,7 @@ describe('Expressions', function(){
 	it('Math primitives', function(){
 		var src = '- Math.PI + Math.PI';
 		var ast = parse(src);
-		ast = astEval.expression(ast);
+		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.equal(out, '0;');
@@ -113,7 +113,7 @@ describe('Array', function(){
 		var src = '[1, 2, 3].map(function(n) {return n * 2 })';
 		var ast = parse(src);
 
-		ast = astEval.expression(ast);
+		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "[2,4,6];");
@@ -123,7 +123,7 @@ describe('Array', function(){
 		var src = '[1, 2,, 3].concat(4, [5], {}, {a: 2}, function(){}, function(){x + 1})';
 		var ast = parse(src);
 
-		ast = astEval.expression(ast);
+		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "[1,2,,3,4,5,{},{ a: 2 },function () {},function () {x + 1;}];");
@@ -138,7 +138,7 @@ describe('Array', function(){
 		var src = '[1, 2, 3].concat(4, [5])';
 		var ast = parse(src);
 
-		ast = astEval.expression(ast);
+		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "[1,2,3,4,5];");
@@ -153,7 +153,7 @@ describe('Array', function(){
 		var src = '["a", "b", "c"].join(" ")';
 		var ast = parse(src);
 
-		ast = astEval.expression(ast);
+		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "'a b c';");
@@ -180,7 +180,7 @@ describe('Math', function(){
 		var src = 'Math.sin(Math.PI / 2)';
 		var ast = parse(src);
 
-		ast = astEval.expression(ast);
+		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "1;");
@@ -200,7 +200,7 @@ describe('String', function(){
 		var src = '"a_b_c".split("_")';
 		var ast = parse(src);
 
-		ast = astEval.expression(ast);
+		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "['a','b','c'];");
@@ -214,7 +214,7 @@ describe('String', function(){
 		var src = '"".split.call("a_b_c", "_")';
 		var ast = parse(src);
 
-		ast = astEval.expression(ast);
+		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "['a','b','c'];");
@@ -226,7 +226,7 @@ describe('String', function(){
 		var src = 'String.prototype.split.call("a_b_c", "_")';
 		var ast = parse(src);
 
-		ast = astEval.expression(ast);
+		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "['a','b','c'];");
@@ -243,7 +243,7 @@ describe('Substitute constants', function(){
 		var src = 'var a = 1; var b = a + 1;';
 		var ast = parse(src);
 
-		ast = astEval.expression(ast);
+		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
 		assert.deepEqual(out, "var a = 1; var b = 2;");
