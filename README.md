@@ -67,8 +67,6 @@ gen(ast); //'[1, false, 43, false]'
 
 ## Options
 
-[pending]
-
 | Option | Default value | Description |
 |---|---|---|
 | optimal | `false` | Ignore eval results lengthen than initial source code |
@@ -78,7 +76,7 @@ gen(ast); //'[1, false, 43, false]'
 
 ## Precautions
 
-* Ast-eval takes supposation that native environment hasn’t been changed and built-ins have it’s original or polyfilled methods. If you redefine the builtins, like with [sugar.js]() or similar library - make sure to provide it as externs.
+* Ast-eval takes supposation that native environment isn’t changed and all built-ins have it’s original or polyfilled methods. If you redefine the built-ins, like with [sugar.js]() or similar library - make sure to provide it as externs.
 
 
 [![NPM](https://nodei.co/npm/ast-eval.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/ast-eval/)
