@@ -189,7 +189,7 @@ describe('Math', function(){
 
 
 describe('Other', function(){
-	it.skip('global literals', function(){
+	it.skip('global variables', function(){
 		//TODO
 	});
 });
@@ -233,31 +233,40 @@ describe('String', function(){
 	});
 });
 
-describe('loops', function(){
+describe('Loops', function(){
 
 });
 
 
-describe('Substitute constants', function(){
+describe('Variables', function(){
 	it.skip('same scope call', function(){
-		var src = 'var a = 1; var b = a + 1;';
+		var src = 'var a = 1; var b = a + 1; var c = a + b + 1;';
 		var ast = parse(src);
 
 		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
-		assert.deepEqual(out, "var a = 1; var b = 2;");
+		assert.deepEqual(out, "var a = 1; var b = 2; var c = 4;");
 	});
 
 	it.skip('ignore substitution', function(){
 
 	});
+
+	it.skip('diff scopes operations', function(){
+		'function x () { var b = a + 1; }; var a = 1;'
+		'function x () { var b = 2;}; var a = 1;'
+	});
 });
 
 
-describe('Substitute functions', function(){
-	it('isolated definition & call', function(){
+describe('Functions', function(){
+	it.skip('isolated definition & call', function(){
+	});
 
+	it('precalc', function(){
+		'function x (c) { var b = 2; return a + b + c; }; var a = 1; var c = x(3);'
+		'function x (c) { var b = 2; return 3 + c; }; var a = 1; var c = 6;'
 	});
 });
 

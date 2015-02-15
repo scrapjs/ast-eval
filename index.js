@@ -29,16 +29,17 @@ var defaults = {
 function evalAst(ast, options){
 	options = extend({}, defaults, options);
 
+	//
+	// u.analyzeDataFlow(ast);
+
+
 	types.visit(ast, {
-		/** Catch entry nodes for optimizations */
+		/** Catch entry nodes to eval */
 		visitExpression: function(path){
 			var node = path.node;
 
-			//ignore some unevaluable expressions
-			if (n.Literal.check(node)) return false;
-			if (n.Identifier.check(node)) return false;
+			if (u.isEvaluable(node)) {
 
-			if (u.isSimple(node)) {
 				var evaledNode = u.evalNode(node);
 
 				//ignore unchanged node
@@ -52,6 +53,7 @@ function evalAst(ast, options){
 			}
 
 			//goes last to catch some complicated patterns first, if any
+			//like [1,2,3+4].call(fn);
 			this.traverse(path);
 		}
 	});

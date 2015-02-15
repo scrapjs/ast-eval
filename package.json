@@ -32,7 +32,14 @@
     "es-eval",
     "eseval",
     "preeval",
-    "pre-eval"
+    "pre-eval",
+    "fold",
+    "constants",
+    "compiler",
+    "optimizing",
+    "dataflow",
+    "data-flow",
+    "analysis"
   ],
   "author": "Deema Ywanov <df.creative@gmail.com>",
   "license": "Unlicensed",
