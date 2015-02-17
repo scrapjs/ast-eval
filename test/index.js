@@ -238,9 +238,9 @@ describe('Loops', function(){
 });
 
 
-describe('Variables', function(){
-	it.skip('same scope call', function(){
-		var src = 'var a = 1; var b = a + 1; var c = a + b + 1;';
+describe.skip('Variables', function(){
+	it('same scope call', function(){
+		var src = 'var a = 1; var b = a + 1; var c = a > 1 ? 0 : a + b + 1;';
 		var ast = parse(src);
 
 		ast = astEval(ast);
@@ -249,13 +249,17 @@ describe('Variables', function(){
 		assert.deepEqual(out, "var a = 1; var b = 2; var c = 4;");
 	});
 
+	it('proper scopes', function(){
+		'var x = 1; (function(){x++});';
+	});
+
 	it.skip('ignore substitution', function(){
 
 	});
 
 	it.skip('diff scopes operations', function(){
-		'function x () { var b = a + 1; }; var a = 1;'
-		'function x () { var b = 2;}; var a = 1;'
+		'function x () { var b = a + 1; }; var a = 1;';
+		'function x () { var b = 2;}; var a = 1;';
 	});
 });
 

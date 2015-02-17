@@ -3,7 +3,7 @@
  * @module ast-eval/util
  */
 
-var analyze = require('escope').analyze;
+var analyzeScopes = require('escope').analyze;
 var q = require('esquery');
 var types = require('ast-types');
 var n = types.namedTypes, b = types.builders;
@@ -11,6 +11,8 @@ var evalAst = require('./');
 var parse = require('esprima').parse;
 var uneval = require('tosource');
 var gen = require('escodegen').generate;
+var a = require('./analyze');
+
 
 /**
  * List of non-evaling array methods
@@ -145,13 +147,13 @@ function isEvaluable(node){
 	});
 	if (n.UpdateExpression.check(node)) return isEvaluable(node.argument);
 	if (n.FunctionExpression.check(node)) return isIsolated(node);
-	// if (n.Identifier.check(node)) {
+	if (n.Identifier.check(node)) {
 		//known (global) identifiers
 		// return node.name in global;
 
 		//if statically calculable variable
-	// 	return isCalculableVar(node);
-	// }
+		return isCalculableVar(node);
+	}
 
 	//FIXME: try to adopt `new Date` etc, to work with concat
 	// if (n.NewExpression.check(node)) {
@@ -165,13 +167,29 @@ function isEvaluable(node){
  * check whether it is variable
  * and if it is statically evaluable
  */
-function isCalculableVar(node){
+function isCalculableVar (node) {
+	// var nodeData = a.getData(node);
+	// var scope = nodeData.scope;
+
+	// var reference = nodeData.reference;
+	// var variable = reference.resolved;
+
+	// console.log('node:', node);
+	// console.log('var:', variable);
+	// console.log('reference:', reference);
+
+	// console.log(nodeData)
 	//how to analyze variables?
 	//via lifecycle: declaration → [operations] → current use
 	//detect which other variables this one depends on in operations
 	//assess whether it is statically calculable to calculate each other variable in operations (they’re independent)
 	//and if it is, statically calculate
 	//via `calcVar()` and `isCalculableVar()`
+
+	//go by each reference from declaration up to current one,
+
+	return false;
+
 }
 
 
@@ -180,13 +198,13 @@ function isString(node){
 	if (n.Literal.check(node) && typeof node.value === 'string') return true;
 }
 /** Test whether literal is a string */
-function isNumber(node){
+function isNumber (node) {
 	if (n.Literal.check(node) && typeof node.value === 'number') return true;
 }
 
 
 /** Test whether node is an object */
-function isObject(node){
+function isObject (node) {
 	if (n.ArrayExpression.check(node)) return true;
 	if (n.ObjectExpression.check(node)) return true;
 	if (n.FunctionExpression.check(node)) return true;
@@ -196,12 +214,12 @@ function isObject(node){
 
 /** Check whether function doesn’t use external variables */
 //FIXME: actually check that function has no assignment expressions to external vars, or doesn’t use them in any way.
-function isIsolated(node){
+function isIsolated (node) {
 	//refuse non-fn nodes
 	if (!n.FunctionExpression.check(node)) return;
 
 	//if node refers to external vars - not isolated
-	var scope = analyze(node).scopes[0];
+	var scope = analyzeScopes(node).scopes[0];
 	if (scope.through.length) return;
 
 	//also if it includes `ThisExpression` - ignore it, as far `this` isn’t clear
@@ -212,7 +230,7 @@ function isIsolated(node){
 
 
 /** Return name of prop in call expression */
-function getCallName(node){
+function getCallName (node) {
 	if (!n.CallExpression.check(node)) return;
 	if (!n.MemberExpression.check(node.callee)) return;
 

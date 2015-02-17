@@ -21,7 +21,9 @@ gen(ast); //'[1, false, 43, false]'
 ```
 
 
-## Options
+## API
+
+### astEval(Node, options) → Node
 
 | Option | Default value | Description |
 |---|---|---|
@@ -29,6 +31,7 @@ gen(ast); //'[1, false, 43, false]'
 | computeProps | `false` | Try to evaluate `computed` properties |
 | externs | `{}` | External constant values or functions |
 | exports | `''` | List of variables to provide as exports |
+| safe | `false` | Ast-eval takes supposation that native environment isn’t changed and all built-ins have it’s original or polyfilled methods. If you redefine the built-ins, like with [sugar.js]() or similar library - make sure to provide it as externs. Or you can set `safe=true` to avoid evaluating globals. |
 
 
 ## Features
@@ -70,7 +73,8 @@ gen(ast); //'[1, false, 43, false]'
 	* [ ] Remove unused functions
 	* [ ] Remove unused properties
 
-* [ ] Detect & collapse clones
+* [ ] Fold clone-code
+	* `a.x`×3 → `var _a = a; _a.x`
 
 * [ ] Data-flow analysis
 	* [ ] Precall functions
@@ -82,6 +86,10 @@ gen(ast); //'[1, false, 43, false]'
 	* [ ] new Array([1,2,3,...])
 	* [ ] [1,2,3,...]
 
+* [ ] Rearrange things
+	* [ ] Hoist functions (place after first use)
+	* [ ] Fold variable declarations
+
 
 ## Names
 
@@ -89,15 +97,11 @@ gen(ast); //'[1, false, 43, false]'
 * esfold
 
 
-## Precautions
-
-* Ast-eval takes supposation that native environment isn’t changed and all built-ins have it’s original or polyfilled methods. If you redefine the built-ins, like with [sugar.js]() or similar library - make sure to provide it as externs.
-
-
 ## References
 
 * [List of compiler optimizations](http://en.wikipedia.org/wiki/Optimizing_compiler) — ideas of folding.
 * Substack’s [static-eval](https://github.com/substack/static-eval) — evaluate static expressions.
+* [esmangle]()
 
 
 [![NPM](https://nodei.co/npm/ast-eval.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/ast-eval/)

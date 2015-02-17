@@ -11,8 +11,9 @@ var gen = require('escodegen').generate;
 var u = require('./util');
 var parse = require('esprima').parse;
 var uneval = require('tosource');
-var analyze = require('escope').analyze;
+var analyzeAst = require('./analyze');
 var extend = require('xtend/mutable');
+var foldVars = require('ast-redeclare');
 
 
 /** Default options */
@@ -29,12 +30,15 @@ var defaults = {
 function evalAst(ast, options){
 	options = extend({}, defaults, options);
 
-	//
-	// u.analyzeDataFlow(ast);
+	//fold variable declarations (so that only one entry declaration for a var).
+	var ast = foldVars(ast);
 
+	//analyze nodes
+	analyzeAst(ast);
 
+	//eval simple expressions
 	types.visit(ast, {
-		/** Catch entry nodes to eval */
+		// catch entry nodes to eval
 		visitExpression: function(path){
 			var node = path.node;
 
@@ -49,6 +53,9 @@ function evalAst(ast, options){
 				if (options.optimize) {
 					//TODO
 				}
+
+				//FIXME: analyze updated subtree
+
 				return evaledNode;
 			}
 
