@@ -13,7 +13,9 @@ var parse = require('esprima').parse;
 var uneval = require('tosource');
 var analyzeAst = require('./analyze');
 var extend = require('xtend/mutable');
-var foldVars = require('ast-redeclare');
+var hoist = require('ast-redeclare');
+var test = require('ast-test');
+var replace = require('ast-replace');
 
 
 /** Default options */
@@ -31,7 +33,7 @@ function evalAst(ast, options){
 	options = extend({}, defaults, options);
 
 	//fold variable declarations (so that only one entry declaration for a var).
-	var ast = foldVars(ast);
+	var ast = hoist(ast);
 
 	//analyze nodes
 	analyzeAst(ast);

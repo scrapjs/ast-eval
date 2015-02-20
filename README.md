@@ -1,6 +1,6 @@
 # ast-eval [![Build Status](https://travis-ci.org/dfcreative/ast-eval.svg?branch=master)](https://travis-ci.org/dfcreative/ast-eval)
 
-Statically evaluate expressions in AST, also known as [fold constants](http://en.wikipedia.org/wiki/Constant_folding).
+Statically evaluate expressions in AST, also known as [constants folding](http://en.wikipedia.org/wiki/Constant_folding). Useful for precompilation tasks.
 
 
 ## Use
@@ -23,15 +23,19 @@ gen(ast); //'[1, false, 43, false]'
 
 ## API
 
-### astEval(Node, options) → Node
+### preeval(Node, options) → Node
 
+Evaluate expressions in a Node, return a new Node with optimized shorten expression nodes.
+
+<!--
 | Option | Default value | Description |
 |---|---|---|
 | optimize | `false` | Ignore eval results lengthen than initial source code |
 | computeProps | `false` | Try to evaluate `computed` properties |
 | externs | `{}` | External constant values or functions |
 | exports | `''` | List of variables to provide as exports |
-| safe | `false` | Ast-eval takes supposation that native environment isn’t changed and all built-ins have it’s original or polyfilled methods. If you redefine the built-ins, like with [sugar.js]() or similar library - make sure to provide it as externs. Or you can set `safe=true` to avoid evaluating globals. |
+| evalGlobals | `true` | Ast-eval takes supposation that native environment isn’t changed and all built-ins have it’s original or polyfilled methods. If you redefine the built-ins, like with [sugar.js]() or similar library - make sure to provide it as externs. Or you can set `evalGlobals=true` to avoid evaluating globals. |
+-->
 
 
 ## Features
@@ -91,17 +95,12 @@ gen(ast); //'[1, false, 43, false]'
 	* [ ] Fold variable declarations
 
 
-## Names
-
-* ast-eval
-* esfold
-
 
 ## References
 
 * [List of compiler optimizations](http://en.wikipedia.org/wiki/Optimizing_compiler) — ideas of folding.
 * Substack’s [static-eval](https://github.com/substack/static-eval) — evaluate static expressions.
-* [esmangle]()
+* [esmangle](https://github.com/estools/esmangle)
 
 
 [![NPM](https://nodei.co/npm/ast-eval.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/ast-eval/)

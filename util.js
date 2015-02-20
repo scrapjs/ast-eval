@@ -12,6 +12,8 @@ var parse = require('esprima').parse;
 var uneval = require('tosource');
 var gen = require('escodegen').generate;
 var a = require('./analyze');
+var test = require('ast-test');
+var replace = require('ast-replace');
 
 
 /**
@@ -46,119 +48,140 @@ var safeArrayMethods = [
 function isEvaluable(node){
 	if (node === null) return true;
 
-	if (n.CallExpression.check(node)) {
-		//simple array method call, like [1,2,3].map(...);
-		if (n.MemberExpression.check(node.callee) &&
-			(
-				n.ArrayExpression.check(getMemberExpressionSource(node.callee)) ||
-				isString(getMemberExpressionSource(node.callee))
-			) &&
-			isEvaluable(getMemberExpressionSource(node.callee))
-		) {
-			//method, accepting simple arguments
-			var callName = getCallName(node);
-			var isSafe = safeArrayMethods.indexOf(callName) >= 0;
-			if (
+	return test(node, {
+		CallExpression: function (node) {
+			//simple array method call, like [1,2,3].map(...);
+			if (n.MemberExpression.check(node.callee) &&
 				(
-					(callName in Array.prototype) ||
-					(callName in String.prototype)
+					n.ArrayExpression.check(getMemberExpressionSource(node.callee)) ||
+					isString(getMemberExpressionSource(node.callee))
 				) &&
-				getCallArguments(node).every(function(node){
-					//harmless methods (non-callable) may accept any functions
-					if (n.FunctionExpression.check(node) && isSafe) return true;
-
-					//else - check that all arguments are known
-					return isEvaluable(node);
-				})
+				isEvaluable(getMemberExpressionSource(node.callee))
 			) {
-				return true;
-			}
-		}
+				//method, accepting simple arguments
+				var callName = getCallName(node);
+				var isSafe = safeArrayMethods.indexOf(callName) >= 0;
+				if (
+					(
+						(callName in Array.prototype) ||
+						(callName in String.prototype)
+					) &&
+					getCallArguments(node).every(function(node){
+						//harmless methods (non-callable) may accept any functions
+						if (n.FunctionExpression.check(node) && isSafe) return true;
 
-		//check that both callee is callable and all arguments are ok
-		return isEvaluable(node.callee) && node.arguments.every(isEvaluable);
-	}
-
-	if (n.MemberExpression.check(node)) {
-		//`{a:1}.a`, but not `[].x`
-		if (isEvaluable(node.object)){
-			//doesn’t call object method
-			if (
-				n.ObjectExpression.check(node.object) && !(node.property.name in Object.prototype)
-			) return true;
-
-			//doesn’t call string method
-			if (
-				isString(node.object) && !(node.property.name in String.prototype)
-			) return true;
-
-			//doesn’t call number method
-			if (
-				isNumber(node.object) && !(node.property.name in Number.prototype)
-			) return true;
-
-			//doesn’t call array method
-			if (
-				n.ObjectExpression.check(node.object) && !(node.property.name in Array.prototype)
-			) return true;
-
-			//doesn’t call function method
-			if (
-				n.FunctionExpression.check(node.object) && !(node.property.name in Function.prototype)
-			) return true;
-		}
-
-		//catch Math.*
-		if (
-			n.Identifier.check(node.object) &&
-			node.object.name === 'Math'
-		){
-			//Math['P' + 'I']
-			if (node.computed) {
-				if (isEvaluable(node.property)) {
-					var propName = evalAst(node.property);
-					return propName in Math;
+						//else - check that all arguments are known
+						return isEvaluable(node);
+					})
+				) {
+					return true;
 				}
 			}
-			//Math.PI
-			else {
-				return node.property.name in Math;
+
+			//check that both callee is callable and all arguments are ok
+			return isEvaluable(node.callee) && node.arguments.every(isEvaluable);
+		},
+
+		MemberExpression: function (node) {
+			//`{a:1}.a`, but not `[].x`
+			if (isEvaluable(node.object)){
+				//doesn’t call object method
+				if (
+					n.ObjectExpression.check(node.object) && !(node.property.name in Object.prototype)
+				) return true;
+
+				//doesn’t call string method
+				if (
+					isString(node.object) && !(node.property.name in String.prototype)
+				) return true;
+
+				//doesn’t call number method
+				if (
+					isNumber(node.object) && !(node.property.name in Number.prototype)
+				) return true;
+
+				//doesn’t call array method
+				if (
+					n.ObjectExpression.check(node.object) && !(node.property.name in Array.prototype)
+				) return true;
+
+				//doesn’t call function method
+				if (
+					n.FunctionExpression.check(node.object) && !(node.property.name in Function.prototype)
+				) return true;
 			}
+
+			//catch Math.*
+			if (
+				n.Identifier.check(node.object) &&
+				node.object.name === 'Math'
+			){
+				//Math['P' + 'I']
+				if (node.computed) {
+					if (isEvaluable(node.property)) {
+						var propName = evalAst(node.property);
+						return propName in Math;
+					}
+				}
+				//Math.PI
+				else {
+					return node.property.name in Math;
+				}
+			}
+		},
+
+		//simple expressions go last to let more complex patterns go first
+		ArrayExpression: function (node) {
+			return node.elements.every(isEvaluable);
+		},
+
+		Literal: function (node) {
+			return true;
+		},
+
+		UnaryExpression: function (node) {
+			return isEvaluable(node.argument);
+		},
+
+		LogicalExpression: function (node) {
+			return  (isObject(node.left) || isEvaluable(node.left)) &&
+					(isObject(node.right) || isEvaluable(node.left));
+		},
+
+		//calls .valueOf or .toString on objects
+		BinaryExpression: function (node) {
+			return isEvaluable(node.left) && isEvaluable(node.right);
+		},
+		ConditionalExpression: function (node) {
+			return isEvaluable(node.test) && isEvaluable(node.alternate) && isEvaluable(node.consequent);
+		},
+		SequenceExpression: function (node) {
+			return node.expressions.every(isEvaluable);
+		},
+		ObjectExpression: function (node) {
+			return node.properties.every(function(prop){
+				return isEvaluable(prop.value);
+			});
+		},
+		UpdateExpression: function (node) {
+			return isEvaluable(node.argument);
+		},
+		FunctionExpression: function (node) {
+			return isIsolated(node);
+		},
+		Identifier: function (node) {
+			//known (global) identifiers
+			// return node.name in global;
+
+			//if statically calculable variable
+			return isCalculableVar(node);
 		}
-	}
-	//simple expressions go last to let more complex patterns go first
-	if (n.ArrayExpression.check(node)) return node.elements.every(isEvaluable);
-	if (n.Literal.check(node)) return true;
 
-
-	if (n.UnaryExpression.check(node)) return isEvaluable(node.argument);
-
-	if (n.LogicalExpression.check(node)) {
-		return  (isObject(node.left) || isEvaluable(node.left)) &&
-				(isObject(node.right) || isEvaluable(node.left));
-	}
-
-	//calls .valueOf or .toString on objects
-	if (n.BinaryExpression.check(node)) return isEvaluable(node.left) && isEvaluable(node.right);
-	if (n.ConditionalExpression.check(node)) return isEvaluable(node.test) && isEvaluable(node.alternate) && isEvaluable(node.consequent);
-	if (n.SequenceExpression.check(node)) return node.expressions.every(isEvaluable);
-	if (n.ObjectExpression.check(node)) return node.properties.every(function(prop){
-		return isEvaluable(prop.value);
+		//FIXME: try to adopt `new Date` etc, to work with concat
+		// if (n.NewExpression.check(node)) {
+		// 	return isEvaluable(node.callee) || n.Identifier.check(node.callee) && node.arguments.every(isEvaluable);
+		// }
 	});
-	if (n.UpdateExpression.check(node)) return isEvaluable(node.argument);
-	if (n.FunctionExpression.check(node)) return isIsolated(node);
-	if (n.Identifier.check(node)) {
-		//known (global) identifiers
-		// return node.name in global;
-
-		//if statically calculable variable
-		return isCalculableVar(node);
-	}
-
-	//FIXME: try to adopt `new Date` etc, to work with concat
-	// if (n.NewExpression.check(node)) {
-	// 	return isEvaluable(node.callee) || n.Identifier.check(node.callee) && node.arguments.every(isEvaluable);
-	// }
 }
 
 
@@ -189,7 +212,6 @@ function isCalculableVar (node) {
 	//go by each reference from declaration up to current one,
 
 	return false;
-
 }
 
 
