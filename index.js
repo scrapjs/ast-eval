@@ -14,8 +14,23 @@ var uneval = require('tosource');
 var analyzeAst = require('./analyze');
 var extend = require('xtend/mutable');
 var hoist = require('ast-redeclare');
-var test = require('ast-test');
-var replace = require('ast-replace');
+var r = require('./replacement');
+
+
+/**
+ * Init replacements.
+ * Simple expressions go last to let more complex patterns trigger first.
+ */
+r.push(
+	require('./replacement/arrayMutators'),
+	require('./replacement/math'),
+	require('./replacement/memberAccess'),
+	require('./replacement/primitives'),
+	require('./replacement/variable')
+);
+
+
+[].push.apply(r, require('./replacement/expression'));
 
 
 /** Default options */
@@ -29,11 +44,11 @@ var defaults = {
 /**
  * Eval AST with options passed
  */
-function evalAst(ast, options){
+function evalAst (ast, options) {
 	options = extend({}, defaults, options);
 
 	//fold variable declarations (so that only one entry declaration for a var).
-	var ast = hoist(ast);
+	ast = hoist(ast);
 
 	//analyze nodes
 	analyzeAst(ast);
@@ -41,12 +56,13 @@ function evalAst(ast, options){
 	//eval simple expressions
 	types.visit(ast, {
 		// catch entry nodes to eval
-		visitExpression: function(path){
+		visitNode: function(path){
 			var node = path.node;
 
-			if (u.isEvaluable(node)) {
+			//if node is evaluable
+			if (r.test(node)) {
 
-				var evaledNode = u.evalNode(node);
+				var evaledNode = r.eval(node);
 
 				//ignore unchanged node
 				if (types.astNodesAreEquivalent(node, evaledNode)) return false;
@@ -61,7 +77,7 @@ function evalAst(ast, options){
 				return evaledNode;
 			}
 
-			//goes last to catch some complicated patterns first, if any
+			//go deep to catch more complicated patterns before simple ones
 			//like [1,2,3+4].call(fn);
 			this.traverse(path);
 		}

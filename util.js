@@ -12,177 +12,7 @@ var parse = require('esprima').parse;
 var uneval = require('tosource');
 var gen = require('escodegen').generate;
 var a = require('./analyze');
-var test = require('ast-test');
-var replace = require('ast-replace');
 
-
-/**
- * List of non-evaling array methods
- */
-var safeArrayMethods = [
-	'concat',
-	'includes',
-	'indexOf',
-	'join',
-	'lastIndexOf',
-	'pop',
-	'push',
-	'reverse',
-	'shift',
-	'slice',
-	'splice',
-	'toSource',
-	'toString',
-	'unshift'
-];
-
-
-/**
- * Test whether node is statically evaluable, in general.
- * Specifically that it is literal or contains only statically known literals.
- *
- * @param {Node} node AST Node to test
- *
- * @return {Boolean} Test result
- */
-function isEvaluable(node){
-	if (node === null) return true;
-
-	return test(node, {
-		CallExpression: function (node) {
-			//simple array method call, like [1,2,3].map(...);
-			if (n.MemberExpression.check(node.callee) &&
-				(
-					n.ArrayExpression.check(getMemberExpressionSource(node.callee)) ||
-					isString(getMemberExpressionSource(node.callee))
-				) &&
-				isEvaluable(getMemberExpressionSource(node.callee))
-			) {
-				//method, accepting simple arguments
-				var callName = getCallName(node);
-				var isSafe = safeArrayMethods.indexOf(callName) >= 0;
-				if (
-					(
-						(callName in Array.prototype) ||
-						(callName in String.prototype)
-					) &&
-					getCallArguments(node).every(function(node){
-						//harmless methods (non-callable) may accept any functions
-						if (n.FunctionExpression.check(node) && isSafe) return true;
-
-						//else - check that all arguments are known
-						return isEvaluable(node);
-					})
-				) {
-					return true;
-				}
-			}
-
-			//check that both callee is callable and all arguments are ok
-			return isEvaluable(node.callee) && node.arguments.every(isEvaluable);
-		},
-
-		MemberExpression: function (node) {
-			//`{a:1}.a`, but not `[].x`
-			if (isEvaluable(node.object)){
-				//doesn’t call object method
-				if (
-					n.ObjectExpression.check(node.object) && !(node.property.name in Object.prototype)
-				) return true;
-
-				//doesn’t call string method
-				if (
-					isString(node.object) && !(node.property.name in String.prototype)
-				) return true;
-
-				//doesn’t call number method
-				if (
-					isNumber(node.object) && !(node.property.name in Number.prototype)
-				) return true;
-
-				//doesn’t call array method
-				if (
-					n.ObjectExpression.check(node.object) && !(node.property.name in Array.prototype)
-				) return true;
-
-				//doesn’t call function method
-				if (
-					n.FunctionExpression.check(node.object) && !(node.property.name in Function.prototype)
-				) return true;
-			}
-
-			//catch Math.*
-			if (
-				n.Identifier.check(node.object) &&
-				node.object.name === 'Math'
-			){
-				//Math['P' + 'I']
-				if (node.computed) {
-					if (isEvaluable(node.property)) {
-						var propName = evalAst(node.property);
-						return propName in Math;
-					}
-				}
-				//Math.PI
-				else {
-					return node.property.name in Math;
-				}
-			}
-		},
-
-		//simple expressions go last to let more complex patterns go first
-		ArrayExpression: function (node) {
-			return node.elements.every(isEvaluable);
-		},
-
-		Literal: function (node) {
-			return true;
-		},
-
-		UnaryExpression: function (node) {
-			return isEvaluable(node.argument);
-		},
-
-		LogicalExpression: function (node) {
-			return  (isObject(node.left) || isEvaluable(node.left)) &&
-					(isObject(node.right) || isEvaluable(node.left));
-		},
-
-		//calls .valueOf or .toString on objects
-		BinaryExpression: function (node) {
-			return isEvaluable(node.left) && isEvaluable(node.right);
-		},
-		ConditionalExpression: function (node) {
-			return isEvaluable(node.test) && isEvaluable(node.alternate) && isEvaluable(node.consequent);
-		},
-		SequenceExpression: function (node) {
-			return node.expressions.every(isEvaluable);
-		},
-		ObjectExpression: function (node) {
-			return node.properties.every(function(prop){
-				return isEvaluable(prop.value);
-			});
-		},
-		UpdateExpression: function (node) {
-			return isEvaluable(node.argument);
-		},
-		FunctionExpression: function (node) {
-			return isIsolated(node);
-		},
-		Identifier: function (node) {
-			//known (global) identifiers
-			// return node.name in global;
-
-			//if statically calculable variable
-			return isCalculableVar(node);
-		}
-
-		//FIXME: try to adopt `new Date` etc, to work with concat
-		// if (n.NewExpression.check(node)) {
-		// 	return isEvaluable(node.callee) || n.Identifier.check(node.callee) && node.arguments.every(isEvaluable);
-		// }
-	});
-}
 
 
 /**
@@ -216,7 +46,7 @@ function isCalculableVar (node) {
 
 
 /** Test whether literal is a string */
-function isString(node){
+function isString (node) {
 	if (n.Literal.check(node) && typeof node.value === 'string') return true;
 }
 /** Test whether literal is a string */
@@ -281,7 +111,7 @@ function getCallName (node) {
 
 
 /** Return arguments of a call */
-function getCallArguments(node){
+function getCallArguments (node) {
 	if (!n.CallExpression.check(node)) return;
 	if (!n.MemberExpression.check(node.callee)) return;
 
@@ -311,7 +141,7 @@ function getCallArguments(node){
 
 
 /** Get member expression initial node */
-function getMemberExpressionSource(node){
+function getMemberExpressionSource (node) {
 	if (!n.MemberExpression.check(node)) return;
 
 	//go deep
@@ -324,7 +154,7 @@ function getMemberExpressionSource(node){
 
 
 /** Return member expression with decalculated properties, if possible */
-function decompute(node){
+function decompute (node) {
 	types.visit(node, {
 		visitMemberExpression: function(path){
 			//resolve deep first
@@ -349,7 +179,7 @@ function decompute(node){
  *
  * @param {Node} node Simple node
  */
-function evalNode(node){
+function evalNode (node) {
 	//wrap object expression: `{}` → `({})`
 	// if (n.ObjectExpression.check(node))
 	node = b.expressionStatement(node);
@@ -359,14 +189,14 @@ function evalNode(node){
 }
 
 
+
 module.exports = {
 	getMemberExpressionSource: getMemberExpressionSource,
 	getCallName: getCallName,
 	getCallArguments: getCallArguments,
 	isString: isString,
-	isEvaluable: isEvaluable,
 	isObject: isObject,
 	isIsolated: isIsolated,
 	decompute: decompute,
-	evalNode: evalNode,
-}
+	evalNode: evalNode
+};
