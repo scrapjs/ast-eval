@@ -1,6 +1,6 @@
 {
   "name": "ast-eval",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Statically evaluate AST",
   "main": "index.js",
   "files": [
