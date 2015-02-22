@@ -13,6 +13,11 @@ module.exports = {
 				n.ObjectExpression.check(node.object) && !(node.property.name in Object.prototype)
 			) return true;
 
+			//doesn’t call array method
+			if (
+				n.ArrayExpression.check(node.object) && !(node.property.name in Array.prototype)
+			) return true;
+
 			//doesn’t call string method
 			if (
 				u.isString(node.object) && !(node.property.name in String.prototype)

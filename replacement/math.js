@@ -24,5 +24,9 @@ module.exports = {
 				return node.property.name in Math;
 			}
 		}
+	},
+
+	eval: function (node) {
+		return u.evalNode(node);
 	}
 };

@@ -197,6 +197,7 @@ module.exports = {
 	isString: isString,
 	isObject: isObject,
 	isIsolated: isIsolated,
+	isNumber: isNumber,
 	decompute: decompute,
 	evalNode: evalNode
 };

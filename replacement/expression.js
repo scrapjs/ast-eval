@@ -3,13 +3,13 @@
  */
 
 var u = require('../util');
-var test = require('./').test;
+var r = require('./');
 
 module.exports = [
 	{
 		match: 'ArrayExpression',
 		test: function (node) {
-			return node.elements.every(test);
+			return node.elements.every(r.test);
 		},
 		eval: u.evalNode
 	},
@@ -17,7 +17,7 @@ module.exports = [
 	{
 		match: 'UnaryExpression',
 		test: function (node) {
-			return test(node.argument);
+			return r.test(node.argument);
 		},
 		eval: u.evalNode
 	},
@@ -25,8 +25,8 @@ module.exports = [
 	{
 		match: 'LogicalExpression',
 		test: function (node) {
-			return  (u.isObject(node.left) || test(node.left)) &&
-					(u.isObject(node.right) || test(node.left));
+			return  (u.isObject(node.left) || r.test(node.left)) &&
+					(u.isObject(node.right) || r.test(node.left));
 		},
 		eval: u.evalNode
 	},
@@ -35,7 +35,7 @@ module.exports = [
 	{
 		match: 'BinaryExpression',
 		test: function (node) {
-			return test(node.left) && test(node.right);
+			return r.test(node.left) && r.test(node.right);
 		},
 		eval: u.evalNode
 	},
@@ -43,7 +43,7 @@ module.exports = [
 	{
 		match: 'ConditionalExpression',
 		test: function (node) {
-			return test(node.test) && test(node.alternate) && test(node.consequent);
+			return r.test(node.test) && r.test(node.alternate) && r.test(node.consequent);
 		},
 		eval: u.evalNode
 	},
@@ -60,7 +60,7 @@ module.exports = [
 		match: 'ObjectExpression',
 		test: function (node) {
 			return node.properties.every(function(prop){
-				return test(prop.value);
+				return r.test(prop.value);
 			});
 		},
 		eval: u.evalNode
@@ -69,7 +69,7 @@ module.exports = [
 	{
 		match: 'UpdateExpression',
 		test: function (node) {
-			return test(node.argument);
+			return r.test(node.argument);
 		},
 		eval: u.evalNode
 	},
@@ -81,10 +81,21 @@ module.exports = [
 		}
 	},
 
+	//default safe fallback for call expressions
+	{
+		match: 'CallExpression',
+		test: function (node) {
+			//check that both callee is callable and all arguments are ok
+			return r.test(node.callee) && node.arguments.every(r.test);
+		},
+
+		eval: u.evalNode
+	}
 
 
-		//FIXME: try to adopt `new Date` etc, to work with concat
-		// if (n.NewExpression.check(node)) {
-		// 	return test(node.callee) || n.Identifier.check(node.callee) && node.arguments.every(test);
-		// }
+
+	//FIXME: try to adopt `new Date` etc, to work with concat
+	// if (n.NewExpression.check(node)) {
+	// 	return r.test(node.callee) || n.Identifier.check(node.callee) && node.arguments.every(test);
+	// }
 ];

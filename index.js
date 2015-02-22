@@ -21,8 +21,9 @@ var r = require('./replacement');
  * Init replacements.
  * Simple expressions go last to let more complex patterns trigger first.
  */
+[].push.apply(r, require('./replacement/array'));
+
 r.push(
-	require('./replacement/arrayMutators'),
 	require('./replacement/math'),
 	require('./replacement/memberAccess'),
 	require('./replacement/primitives'),
