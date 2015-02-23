@@ -12,7 +12,7 @@ var parse = require('esprima').parse;
 var uneval = require('tosource');
 var gen = require('escodegen').generate;
 var a = require('./analyze');
-
+var r = require('./replacement');
 
 
 /**
@@ -153,6 +153,26 @@ function getMemberExpressionSource (node) {
 }
 
 
+/** Get node’s computed property, if node is computed */
+function getPropertyName (node) {
+	if (!n.MemberExpression.check(node)) return;
+
+	//Math['P' + 'I']
+	if (node.computed) {
+		if (r.test(node.property)) {
+			return r.eval(node.property);
+		}
+
+		else return;
+	}
+
+	//Math.PI
+	else {
+		return node.property.name;
+	}
+}
+
+
 /** Return member expression with decalculated properties, if possible */
 function decompute (node) {
 	types.visit(node, {
@@ -193,6 +213,7 @@ function evalNode (node) {
 module.exports = {
 	getMemberExpressionSource: getMemberExpressionSource,
 	getCallName: getCallName,
+	getPropertyName: getPropertyName,
 	getCallArguments: getCallArguments,
 	isString: isString,
 	isObject: isObject,

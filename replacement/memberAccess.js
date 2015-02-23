@@ -38,5 +38,7 @@ module.exports = {
 				n.FunctionExpression.check(node.object) && !(node.property.name in Function.prototype)
 			) return true;
 		}
-	}
-}
+	},
+
+	eval: u.evalNode
+};

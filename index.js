@@ -21,15 +21,15 @@ var r = require('./replacement');
  * Init replacements.
  * Simple expressions go last to let more complex patterns trigger first.
  */
+
 [].push.apply(r, require('./replacement/array'));
+[].push.apply(r, require('./replacement/math'));
 
 r.push(
-	require('./replacement/math'),
 	require('./replacement/memberAccess'),
 	require('./replacement/primitives'),
 	require('./replacement/variable')
 );
-
 
 [].push.apply(r, require('./replacement/expression'));
 
@@ -57,7 +57,10 @@ function evalAst (ast, options) {
 	//eval simple expressions
 	types.visit(ast, {
 		// catch entry nodes to eval
-		visitNode: function(path){
+		visitNode: function (path) {
+			//go leafs first to be able to eval simple things first (easier to check)
+			this.traverse(path);
+
 			var node = path.node;
 
 			//if node is evaluable
@@ -77,10 +80,6 @@ function evalAst (ast, options) {
 
 				return evaledNode;
 			}
-
-			//go deep to catch more complicated patterns before simple ones
-			//like [1,2,3+4].call(fn);
-			this.traverse(path);
 		}
 	});
 

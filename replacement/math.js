@@ -1,32 +1,42 @@
 var n = require('ast-types').namedTypes;
 var isEvaluable = require('./').test;
 var u = require('../util');
+var isPrimitive = require('is-primitive');
+var r = require('./');
 
-module.exports = {
-	match: 'MemberExpression',
+module.exports = [
+	//Math.const
+	{
+		match: 'MemberExpression',
 
-	test: function (node) {
-		//catch Math.*
-		if (
-			n.Identifier.check(node.object) &&
-			node.object.name === 'Math'
-		){
-			//Math['P' + 'I']
-			if (node.computed) {
-				if (u.isEvaluable(node.property)) {
-					var propName = u.evalNode(node.property);
-					return propName in Math;
-				}
-			}
+		test: function (node) {
+			var source = u.getMemberExpressionSource(node);
 
-			//Math.PI
-			else {
-				return node.property.name in Math;
-			}
-		}
+			if (source.name !== 'Math') return false;
+
+			var propName = u.getPropertyName(node);
+
+			return propName !== undefined && propName in Math && isPrimitive(Math[propName]);
+		},
+
+		eval: u.evalNode
 	},
 
-	eval: function (node) {
-		return u.evalNode(node);
+	//Math.fun()
+	{
+		match: 'CallExpression',
+		test: function (node) {
+			if (n.MemberExpression.check(node.callee)) {
+				var source = u.getMemberExpressionSource(node.callee);
+
+				if (source.name !== 'Math') return false;
+			}
+
+			var propName = u.getPropertyName(node.callee);
+
+			return propName in Math && node.arguments.every(r.test);
+		},
+
+		eval: u.evalNode
 	}
-};
+];
