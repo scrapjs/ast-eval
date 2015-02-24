@@ -81,6 +81,13 @@ function isIsolated (node) {
 }
 
 
+/** Test whether node is transferable as is (with no eval) */
+function isTransferable (node) {
+	if (n.FunctionExpression.check(node)) return true;
+	if (n.NewExpression.check(node)) return true;
+}
+
+
 /** Return name of prop in call expression */
 function getCallName (node) {
 	if (!n.CallExpression.check(node)) return;
@@ -218,6 +225,7 @@ module.exports = {
 	isString: isString,
 	isObject: isObject,
 	isIsolated: isIsolated,
+	isTransferable: isTransferable,
 	isNumber: isNumber,
 	decompute: decompute,
 	evalNode: evalNode

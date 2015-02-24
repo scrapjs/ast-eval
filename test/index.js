@@ -139,14 +139,14 @@ describe('Array', function(){
 		assert.deepEqual(out, "[1,2,,3,4,5,{},{ a: 2 },function () {},function () {x + 1;}];");
 	});
 
-	it.skip('concat special objects', function(){
+	it('concat special objects', function(){
 		var src = '[new A,1, 2,, 3].concat(4, [5], {}, {a: 2}, new Date, function(){}, function(){x + 1})';
 		var ast = parse(src);
 
 		ast = astEval(ast);
 		var out = gen(ast, {format: {indent: {style: ''}, newline: ''}});
 
-		assert.deepEqual(out, "[new A,1,2,,3,4,5,{},{ a: 2 },new Date,function () {},function () {x + 1;}];");
+		assert.deepEqual(out, "[new A(),1,2,,3,4,5,{},{ a: 2 },new Date(),function () {},function () {x + 1;}];");
 	});
 
 	it.skip('unresolvable transforms', function(){
