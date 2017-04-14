@@ -1,5 +1,7 @@
 # ast-eval [![Build Status](https://travis-ci.org/dfcreative/ast-eval.svg?branch=master)](https://travis-ci.org/dfcreative/ast-eval) [![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/dfcreative/ast-eval.svg)](https://greenkeeper.io/)
+
 Statically evaluate expressions in AST, also known as [constants folding](http://en.wikipedia.org/wiki/Constant_folding). Useful for precompilation tasks.
 
 
